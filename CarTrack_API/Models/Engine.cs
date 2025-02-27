@@ -3,7 +3,7 @@
 public class Engine
 {
     public int Id { get; set; }
-    public required string EngineFuelType { get; set; }
+    public required string FuelType { get; set; }
     public int HorsePower { get; set; }
     public int Torque { get; set; }
     public int Cylinders { get; set; }

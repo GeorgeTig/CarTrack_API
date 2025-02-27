@@ -9,7 +9,9 @@ public class User
     public int PhoneNumber { get; set; }
     public Boolean IsActive { get; set; }
     
-    public UserRole Role { get; set; } 
+    public int RoleId { get; set; }
+    public UserRole Role { get; set; }
+    
     public List<Vehicle> Vehicles { get; set; } = new();
     public List<VehiclePapers> VehiclePapers { get; set; } = new();
     public List<Notification> Notifications { get; set; } = new();

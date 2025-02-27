@@ -4,7 +4,7 @@ public class VehiclePapers
 {
     public int Id { get; set; }
     public required string PaperType { get; set; }
-    public DateTime CreationDate { get; set; }
+    public DateTime IssueDate { get; set; }
     public Boolean IsActive { get; set; }
     
     public int VehicleId { get; set; }
