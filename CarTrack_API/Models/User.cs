@@ -7,6 +7,7 @@ public class User
     public required string Password { get; set; }
     public required string Email { get; set; }
     public int PhoneNumber { get; set; }
+    public int VehicleSlots { get; set; }
     public Boolean IsActive { get; set; }
     
     public int RoleId { get; set; }
