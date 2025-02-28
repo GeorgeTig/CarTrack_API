@@ -5,7 +5,7 @@ public class MaintenanceRecord
     public int Id { get; set; }
     public DateTime Date { get; set; }
     public required string Description { get; set; }
-    public double Cost { get; set; }
+    public decimal Cost { get; set; }
     
     public int VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }

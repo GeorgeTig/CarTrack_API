@@ -7,7 +7,7 @@ public class Appointment
     public Boolean IsFinished { get; set; }
     public Boolean IsCancelled { get; set; }
     public required string Description { get; set; }
-    public double Cost { get; set; }
+    public decimal Cost { get; set; }
     
     public int ServiceId { get; set; }
     public Service Service { get; set; }
