@@ -16,6 +16,7 @@ public class Vehicle
     public int EngineId { get; set; }
     public Engine Engine { get; set; }
     
+    public User User { get; set; }
     public int UserId { get; set; }
     
     public List<VehiclePapers> VehiclePapers { get; set; } = new();

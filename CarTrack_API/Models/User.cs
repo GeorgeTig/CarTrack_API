@@ -18,6 +18,5 @@ public class User
     public List<Notification> Notifications { get; set; } = new();
     public List<Service> Services { get; set; } = new();
     public List<Appointment> Appointments { get; set; } = new();
-    public List<Mechanic_Service> MechanicService { get; set; } = new();
     public List<MaintenanceRecord> MaintenanceRecords { get; set; } = new();
 }
