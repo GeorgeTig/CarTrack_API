@@ -15,4 +15,12 @@
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="BusinessLogic\Extensions\" />
+      <Folder Include="BusinessLogic\Mapping\" />
+      <Folder Include="BusinessLogic\Services\" />
+      <Folder Include="Controllers\" />
+      <Folder Include="DataAccess\Dtos\" />
+    </ItemGroup>
+
 </Project>
