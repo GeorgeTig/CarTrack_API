@@ -6,20 +6,14 @@ public class Vehicle
 {
     public int Id { get; set; }
     public int Vin { get; set; }
-    public required string Brand { get; set; }
-    public required string Model { get; set; }
-    public required string Year { get; set; }
     public int Mileage { get; set; }
-    public required string BodyType { get; set; }
-    public Boolean IsActive { get; set; }
     
-    public int EngineId { get; set; }
-    public Engine Engine { get; set; }
-    
-    public User User { get; set; }
-    public int UserId { get; set; }
-    
-    public List<VehiclePapers> VehiclePapers { get; set; } = new();
-    public List<MaintenanceRecord> MaintenanceRecords { get; set; } = new();
-    
+    public int ClientId { get; set; }
+    public required ClientProfile Client { get; set; }
+    public int VehicleModelId { get; set; }
+    public required VehicleModel VehicleModel { get; set; }
+    public List<Appointment> Appointments = new();
+    public List<VehiclePaper> VehiclePapers = new();
+    public MaintenanceRecord MaintenanceRecord;
+
 }

@@ -10,12 +10,11 @@ public class User
     public Boolean IsActive { get; set; }
     
     public int RoleId { get; set; }
-    public UserRole Role { get; set; }
-    
-    public List<Vehicle> Vehicles { get; set; } = new();
-    public List<VehiclePapers> VehiclePapers { get; set; } = new();
-    public List<Notification> Notifications { get; set; } = new();
-    public List<Service> Services { get; set; } = new();
-    public List<Appointment> Appointments { get; set; } = new();
-    public List<MaintenanceRecord> MaintenanceRecords { get; set; } = new();
+    public required UserRole Role { get; set; }
+    public ClientProfile ClientProfile { get; set; } 
+    public ManagerProfile ManagerProfile { get; set; }
+    public MechanicProfile MechanicProfile { get; set; }
+    public List<Notification> Notifications = new();
+
+
 }

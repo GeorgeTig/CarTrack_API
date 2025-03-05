@@ -7,77 +7,120 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
-    public DbSet<VehiclePapers> VehiclePapers { get; set; }
-    public DbSet<Engine> Engines { get; set; }
+    public DbSet<VehicleModel> VehicleModels { get; set; }
+    public DbSet<VehiclePaper> VehiclePapers { get; set; }
+    public DbSet<VehicleEngine> VehicleEngines { get; set; }
     public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
     public DbSet<Appointment> Appointments { get; set; }
-    public DbSet<Service> Services { get; set; }
+    public DbSet<RepairShop> RepairShops { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<Notification> Notifications { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.User)
+            .WithMany(u => u.Notifications)
+            .HasForeignKey(n => n.UserId);
+        
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
             .WithMany(r => r.Users)
             .HasForeignKey(u => u.RoleId);
+
+        modelBuilder.Entity<ClientProfile>()
+            .HasKey(cp => cp.UserId);
         
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Vehicles)
-            .WithOne(v => v.User)
-            .HasForeignKey(v => v.UserId);
+        modelBuilder.Entity<ClientProfile>()
+            .HasOne(cp => cp.User)
+            .WithOne(u => u.ClientProfile)
+            .HasForeignKey<ClientProfile>(cp => cp.UserId);
+
+        modelBuilder.Entity<MechanicProfile>()
+            .HasKey(mp => mp.UserId);
         
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.VehiclePapers)
-            .WithOne(vp => vp.User)
-            .HasForeignKey(vp => vp.UserId);
+        modelBuilder.Entity<MechanicProfile>()
+            .HasOne(mp => mp.User)
+            .WithOne(u => u.MechanicProfile)
+            .HasForeignKey<MechanicProfile>(mp => mp.UserId);
         
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Notifications)
-            .WithOne(n => n.User)
-            .HasForeignKey(n => n.UserId);
+        modelBuilder.Entity<MechanicProfile>()
+            .HasOne(m => m.RepairShop)
+            .WithMany(r => r.Mechanics)
+            .HasForeignKey(m => m.RepairShopId);
+
+        modelBuilder.Entity<ManagerProfile>()
+            .HasKey(mp => mp.UserId);
         
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.Appointments)
-            .WithOne(a => a.User)
-            .HasForeignKey(a => a.UserId);
-        
-        modelBuilder.Entity<User>()
-            .HasMany(u => u.MaintenanceRecords)
-            .WithOne(mr => mr.User)
-            .HasForeignKey(mr => mr.UserId);
+        modelBuilder.Entity<ManagerProfile>()
+            .HasOne(mp => mp.User)
+            .WithOne(u => u.ManagerProfile)
+            .HasForeignKey<ManagerProfile>(mp => mp.UserId);
+
+        modelBuilder.Entity<Vehicle>()
+            .HasOne(v => v.Client)
+            .WithMany(c => c.Vehicles)
+            .HasForeignKey(v => v.ClientId);
         
         modelBuilder.Entity<Vehicle>()
-            .HasOne(v => v.Engine)
-            .WithMany(e => e.Vehicles)
-            .HasForeignKey(v => v.EngineId);
+            .HasOne(v => v.VehicleModel)
+            .WithMany(vm => vm.Vehicles)
+            .HasForeignKey(v => v.VehicleModelId);
         
-        modelBuilder.Entity<Vehicle>()
-            .HasMany(v => v.VehiclePapers)
-            .WithOne(vp => vp.Vehicle)
+        modelBuilder.Entity<VehicleModel>()
+            .HasOne(vm => vm.VehicleEngine)
+            .WithMany(e => e.VehicleModels)
+            .HasForeignKey(vm => vm.VehicleEngineId);
+        
+        modelBuilder.Entity<VehiclePaper>()
+            .HasOne(vp => vp.Vehicle)
+            .WithMany(v => v.VehiclePapers)
             .HasForeignKey(vp => vp.VehicleId);
         
-        modelBuilder.Entity<Vehicle>()
-            .HasMany(v => v.MaintenanceRecords)
-            .WithOne(mr => mr.Vehicle)
-            .HasForeignKey(mr => mr.VehicleId);
+        modelBuilder.Entity<RepairShop>()
+            .HasOne(r => r.Manager)
+            .WithMany(m => m.RepairShops)
+            .HasForeignKey(r => r.ManagerId);
         
-        modelBuilder.Entity<Service>()
-            .HasMany(s => s.Appointments)
-            .WithOne(a => a.Service)
-            .HasForeignKey(a => a.ServiceId);
+        modelBuilder.Entity<Deal>()
+            .HasOne(d => d.RepairShop)
+            .WithMany(s => s.Deals)
+            .HasForeignKey(d => d.RepairShopId);
         
-        modelBuilder.Entity<Service>()
-            .HasMany(s => s.Workers)
-            .WithMany(ms => ms.Services)
-            .UsingEntity(j=> j.ToTable("Worker_Service"));
+        modelBuilder.Entity<Appointment>()
+            .HasOne(a => a.RepairShop)
+            .WithMany(r => r.Appointments)
+            .HasForeignKey(a => a.RepairShopId);
         
-        modelBuilder.Entity<Service>()
-            .HasMany(s => s.MaintenanceRecords)
-            .WithOne(mr => mr.Service)
-            .HasForeignKey(mr => mr.ServiceId);
+        modelBuilder.Entity<Appointment>()
+            .HasOne(a => a.Mechanic)
+            .WithMany(m => m.Appointments)
+            .HasForeignKey(a => a.MechanicId);
         
+        modelBuilder.Entity<Appointment>()
+            .HasOne(a => a.Vehicle)
+            .WithMany(v => v.Appointments)
+            .HasForeignKey(a => a.VehicleId);
+        
+        modelBuilder.Entity<Appointment>()
+            .HasOne(a => a.MaintenanceRecord)
+            .WithMany(m => m.Appointments)
+            .HasForeignKey(a => a.MaintenanceRecordId);
+        
+        modelBuilder.Entity<Appointment>()
+            .HasMany(a => a.Deals)
+            .WithMany(d => d.Appointments)
+            .UsingEntity<Dictionary<string, object>>(
+                "AppointmentDeal", 
+                j => j.HasOne<Deal>().WithMany().HasForeignKey("DealId"),
+                j => j.HasOne<Appointment>().WithMany().HasForeignKey("AppointmentId") 
+            );
+
+        modelBuilder.Entity<MaintenanceRecord>()
+            .HasOne(m => m.Vehicle)
+            .WithOne(v => v.MaintenanceRecord)
+            .HasForeignKey<MaintenanceRecord>(m => m.VehicleId);
         
         base.OnModelCreating(modelBuilder);
     }

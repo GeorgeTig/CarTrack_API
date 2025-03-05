@@ -8,17 +8,18 @@ public class Appointment
     public Boolean IsCancelled { get; set; }
     public required string Description { get; set; }
     public decimal Cost { get; set; }
+
+    public List<Deal> Deals { get; set; } = new();
     
-    public int ServiceId { get; set; }
-    public Service Service { get; set; }
+    public int RepairShopId { get; set; }
+    public required RepairShop RepairShop { get; set; }
     
     public int VehicleId { get; set; }
-    public Vehicle Vehicle { get; set; }
-    
-    public int UserId { get; set; }
-    public User User { get; set; }
+    public required Vehicle Vehicle { get; set; }
     
     public int MechanicId { get; set; }
-    public User Mechanic { get; set; }
+    public MechanicProfile Mechanic { get; set; }
+    public int MaintenanceRecordId { get; set; }
+    public MaintenanceRecord MaintenanceRecord { get; set; }
     
 }

@@ -1,6 +1,6 @@
 ﻿namespace CarTrack_API.Models;
 
-public class VehiclePapers
+public class VehiclePaper
 {
     public int Id { get; set; }
     public required string PaperType { get; set; }
@@ -10,6 +10,4 @@ public class VehiclePapers
     public int VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }
     
-    public int UserId { get; set; }
-    public User User { get; set; }
 }

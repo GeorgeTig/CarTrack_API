@@ -3,6 +3,7 @@ using System;
 using CarTrack_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305143850_Modified1")]
+    partial class Modified1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +24,6 @@ namespace CarTrack_API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("AppointmentDeal", b =>
-                {
-                    b.Property<int>("AppointmentId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DealId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("AppointmentId", "DealId");
-
-                    b.HasIndex("DealId");
-
-                    b.ToTable("AppointmentDeal");
-                });
 
             modelBuilder.Entity("CarTrack_API.Models.Appointment", b =>
                 {
@@ -104,6 +92,9 @@ namespace CarTrack_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
@@ -119,6 +110,8 @@ namespace CarTrack_API.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
 
                     b.HasIndex("RepairShopId");
 
@@ -425,21 +418,6 @@ namespace CarTrack_API.Migrations
                     b.ToTable("VehiclePapers");
                 });
 
-            modelBuilder.Entity("AppointmentDeal", b =>
-                {
-                    b.HasOne("CarTrack_API.Models.Appointment", null)
-                        .WithMany()
-                        .HasForeignKey("AppointmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarTrack_API.Models.Deal", null)
-                        .WithMany()
-                        .HasForeignKey("DealId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CarTrack_API.Models.Appointment", b =>
                 {
                     b.HasOne("CarTrack_API.Models.MaintenanceRecord", "MaintenanceRecord")
@@ -488,6 +466,10 @@ namespace CarTrack_API.Migrations
 
             modelBuilder.Entity("CarTrack_API.Models.Deal", b =>
                 {
+                    b.HasOne("CarTrack_API.Models.Appointment", null)
+                        .WithMany("Deals")
+                        .HasForeignKey("AppointmentId");
+
                     b.HasOne("CarTrack_API.Models.RepairShop", "RepairShop")
                         .WithMany("Deals")
                         .HasForeignKey("RepairShopId")
@@ -614,6 +596,11 @@ namespace CarTrack_API.Migrations
                         .IsRequired();
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("CarTrack_API.Models.Appointment", b =>
+                {
+                    b.Navigation("Deals");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.ClientProfile", b =>
