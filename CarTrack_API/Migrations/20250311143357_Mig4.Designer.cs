@@ -3,6 +3,7 @@ using System;
 using CarTrack_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250311143357_Mig4")]
+    partial class Mig4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,7 +86,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("Appointment");
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Body", b =>
@@ -106,7 +109,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Body");
+                    b.ToTable("Bodies");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.ClientProfile", b =>
@@ -116,7 +119,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("ClientProfile");
+                    b.ToTable("ClientProfiles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Deal", b =>
@@ -145,7 +148,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("RepairShopId");
 
-                    b.ToTable("Deal");
+                    b.ToTable("Deals");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.MaintenanceRecord", b =>
@@ -175,7 +178,7 @@ namespace CarTrack_API.Migrations
                     b.HasIndex("VehicleId")
                         .IsUnique();
 
-                    b.ToTable("MaintenanceRecord");
+                    b.ToTable("MaintenanceRecords");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.ManagerProfile", b =>
@@ -185,7 +188,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("ManagerProfile");
+                    b.ToTable("ManagerProfiles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.MechanicProfile", b =>
@@ -200,7 +203,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("RepairShopId");
 
-                    b.ToTable("MechanicProfile");
+                    b.ToTable("MechanicProfiles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Notification", b =>
@@ -228,7 +231,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notification");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Producer", b =>
@@ -245,7 +248,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Producer");
+                    b.ToTable("Producers");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.RepairShop", b =>
@@ -277,7 +280,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("ManagerId");
 
-                    b.ToTable("RepairShop");
+                    b.ToTable("RepairShops");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.User", b =>
@@ -313,7 +316,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("User");
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.UserRole", b =>
@@ -330,7 +333,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserRole");
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Vehicle", b =>
@@ -359,7 +362,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("VehicleModelId");
 
-                    b.ToTable("Vehicle");
+                    b.ToTable("Vehicles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.VehicleEngine", b =>
@@ -386,7 +389,7 @@ namespace CarTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Horsepower")
+                    b.Property<int>("HorsePower")
                         .HasColumnType("integer");
 
                     b.Property<double>("Size")
@@ -401,7 +404,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VehicleEngine");
+                    b.ToTable("VehicleEngines");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.VehicleModel", b =>
@@ -415,11 +418,11 @@ namespace CarTrack_API.Migrations
                     b.Property<int>("BodyId")
                         .HasColumnType("integer");
 
-                    b.Property<long>("Consumption")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Consumption")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("FuelTankCapacity")
-                        .HasColumnType("bigint");
+                    b.Property<int>("FuelTankCapacity")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ModelFullName")
                         .IsRequired()
@@ -446,7 +449,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("VehicleEngineId");
 
-                    b.ToTable("VehicleModel");
+                    b.ToTable("VehicleModels");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.VehiclePaper", b =>
@@ -474,7 +477,7 @@ namespace CarTrack_API.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("VehiclePaper");
+                    b.ToTable("VehiclePapers");
                 });
 
             modelBuilder.Entity("AppointmentDeal", b =>

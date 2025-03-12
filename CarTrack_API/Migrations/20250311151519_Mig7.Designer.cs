@@ -3,6 +3,7 @@ using System;
 using CarTrack_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250311151519_Mig7")]
+    partial class Mig7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -415,11 +418,11 @@ namespace CarTrack_API.Migrations
                     b.Property<int>("BodyId")
                         .HasColumnType("integer");
 
-                    b.Property<long>("Consumption")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Consumption")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("FuelTankCapacity")
-                        .HasColumnType("bigint");
+                    b.Property<int>("FuelTankCapacity")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ModelFullName")
                         .IsRequired()

@@ -5,17 +5,24 @@ namespace CarTrack_API.Data;
 
 public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Vehicle> Vehicles { get; set; }
-    public DbSet<VehicleModel> VehicleModels { get; set; }
-    public DbSet<VehiclePaper> VehiclePapers { get; set; }
-    public DbSet<VehicleEngine> VehicleEngines { get; set; }
-    public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
-    public DbSet<Appointment> Appointments { get; set; }
-    public DbSet<RepairShop> RepairShops { get; set; }
-    public DbSet<UserRole> UserRoles { get; set; }
-    public DbSet<Notification> Notifications { get; set; }
-
+    public DbSet<Appointment> Appointment { get; set; }
+    public DbSet<Body> Body { get; set; }
+    public DbSet<ClientProfile> ClientProfile { get; set; }
+    public DbSet<Deal> Deal { get; set; }
+    public DbSet<MaintenanceRecord> MaintenanceRecord { get; set; }
+    public DbSet<ManagerProfile> ManagerProfile { get; set; }
+    public DbSet<MechanicProfile> MechanicProfile { get; set; }
+    public DbSet<Notification> Notification { get; set; }
+    public DbSet<Producer> Producer { get; set; }
+    public DbSet<RepairShop> RepairShop { get; set; }
+    public DbSet<User> User { get; set; }
+    public DbSet<UserRole> UserRole { get; set; }
+    public DbSet<Vehicle> Vehicle { get; set; }
+    public DbSet<VehicleEngine> VehicleEngine { get; set; }
+    public DbSet<VehicleModel> VehicleModel { get; set; }
+    public DbSet<VehiclePaper> VehiclePaper { get; set; }
+    
+ 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -72,6 +79,16 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(vm => vm.VehicleEngine)
             .WithMany(e => e.VehicleModels)
             .HasForeignKey(vm => vm.VehicleEngineId);
+        
+        modelBuilder.Entity<VehicleModel>()
+            .HasOne(vm => vm.Body)
+            .WithMany(b => b.VehicleModels)
+            .HasForeignKey(vm => vm.BodyId);
+        
+        modelBuilder.Entity<VehicleModel>()
+            .HasOne(vm => vm.Producer)
+            .WithMany(p => p.VehicleModels)
+            .HasForeignKey(vm => vm.ProducerId);
         
         modelBuilder.Entity<VehiclePaper>()
             .HasOne(vp => vp.Vehicle)

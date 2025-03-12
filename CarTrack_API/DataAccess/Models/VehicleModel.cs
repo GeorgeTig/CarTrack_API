@@ -3,15 +3,17 @@
 public class VehicleModel
 {
     public int Id { get; set; }
-    public required string Series { get; set; }
-    public required string Brand { get; set; }
     public int Year { get; set; }
-    public required string BodyType { get; set; }
-    public int DoorNumber { get; set; }
-    public required string TransmissionType { get; set; }
-    public required string WheelDriveType { get; set; } //front wheel, back wheel, 
-    public int FuelTankCapacity { get; set; }
+    public required string SeriesName { get; set; }
+    public required string ModelFullName { get; set; }
+    public long FuelTankCapacity { get; set; } // in gallon
+    public long Consumption { get; set; } // The consumption is in mile/gallon
     
+    
+    public int BodyId { get; set; }
+    public required Body Body { get; set; }
+    public int ProducerId { get; set; }
+    public required Producer Producer { get; set; }
     public int VehicleEngineId { get; set; }
     public required VehicleEngine VehicleEngine { get; set; }
     public List<Vehicle> Vehicles { get; set; } = new();
