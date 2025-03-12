@@ -2,7 +2,7 @@
 
 namespace CarTrack_API.DataAccess.Repositories.UserRepository;
 
-public class UserRepository(ApplicationDbContext context) : BaseRepository(context), IUserRepository
+public class UserRepository(ApplicationDbContext context) : BaseRepository.BaseRepository(context), IUserRepository
 {
     public void Register()
     {

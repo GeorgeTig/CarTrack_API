@@ -1,6 +1,6 @@
 ﻿using CarTrack_API.Data;
 
-namespace CarTrack_API.DataAccess.Repositories;
+namespace CarTrack_API.DataAccess.Repositories.BaseRepository;
 
 public class BaseRepository
 {
