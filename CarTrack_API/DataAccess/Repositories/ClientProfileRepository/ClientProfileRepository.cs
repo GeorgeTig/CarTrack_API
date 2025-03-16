@@ -1,4 +1,4 @@
-﻿using CarTrack_API.Data;
+﻿using CarTrack_API.DataAccess.DataContext;
 
 namespace CarTrack_API.DataAccess.Repositories.ClientProfileRepository;
 

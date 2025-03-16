@@ -1,7 +1,7 @@
 ﻿using CarTrack_API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CarTrack_API.Data;
+namespace CarTrack_API.DataAccess.DataContext;
 
 public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
 {

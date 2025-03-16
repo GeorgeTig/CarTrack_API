@@ -1,4 +1,4 @@
-using CarTrack_API.Data;
+using CarTrack_API.DataAccess.DataContext;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
