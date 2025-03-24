@@ -1,6 +1,9 @@
-﻿namespace CarTrack_API.DataAccess.Repositories.UserRepository;
+﻿using CarTrack_API.Models;
+
+namespace CarTrack_API.DataAccess.Repositories.UserRepository;
 
 public interface IUserRepository
-{
-    public void Register();
+{ 
+    void Register();
+    Task<User?> GetByEmailAsync(string email); 
 }

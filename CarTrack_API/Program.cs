@@ -1,4 +1,5 @@
 using System.Text;
+using CarTrack_API.BusinessLogic.Extensions;
 using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.BusinessLogic.Services;
 using CarTrack_API.DataAccess.DataContext;
@@ -10,6 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Add services
+builder.Services.AddBusinessService();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi(); 
 builder.Services.AddAutoMapper(typeof(MappingProfile)); // Add AutoMapper
 
@@ -17,10 +23,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>{
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 }); // Add Database Connection
 
-var jwtKey = builder.Configuration["Jwt:Key"]; // Get the key from appsettings.json
-var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)); // Create a SymmetricSecurityKey
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) // Add authentication
+// JWT Authentication
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -31,7 +36,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) // Ad
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = key
+            IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
 
