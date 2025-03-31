@@ -6,22 +6,24 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace CarTrack_API.BusinessLogic.Services;
 
-public class JwtTokenService 
+public class JwtService : IJwtService
 {
    private readonly IConfiguration _config;
    
-   public JwtTokenService(IConfiguration config)
+   public JwtService(IConfiguration config)
     {
          _config = config;
     }
 
-    public string GenerateToken(User user)
+    public string GenerateJwtToken(User user)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.Role)
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),  
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),        
+            new Claim("username", user.Username),                        
+            new Claim("profileType", user.ClientProfile != null ? "Client" : user.ManagerProfile != null ? "Manager" : "Mechanic"), 
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())  // Unique token ID
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -31,7 +33,7 @@ public class JwtTokenService
             issuer:_config["Jwt:Issuer"],
             audience:_config["Jwt:Audience"],
             claims:claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddHours(2),
             signingCredentials: creds
         );
 

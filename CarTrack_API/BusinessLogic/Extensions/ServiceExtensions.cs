@@ -14,7 +14,7 @@ public static class ServiceExtensions
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<JwtTokenService>();
+        services.AddScoped<JwtService>();
         services.AddScoped<IClientProfileRepository, ClientProfileRepository>();
         services.AddScoped<IDealRepository, DealRepository>();
         services.AddScoped<IMaintenanceRecordRepository, MaintenanceRecordRepository>();
