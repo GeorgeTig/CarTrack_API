@@ -1,49 +1,41 @@
-﻿using AutoMapper;
-using CarTrack_API.BusinessLogic.Services;
-using CarTrack_API.BusinessLogic.Services.AuthService;
-using CarTrack_API.BusinessLogic.Services.UserService;
-using CarTrack_API.DataAccess.Dtos;
-using CarTrack_API.DataAccess.Dtos.LoginDtos;
-using CarTrack_API.DataAccess.Dtos.RegisterDtos;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using CarTrack_API.BusinessLogic.Services.UserService;
+using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
+using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarTrack_API.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController( IUserService userService) : ControllerBase
 {
-    private readonly JwtService _service;
-    private readonly IMapper _mapper;
-    private readonly IAuthService _authService;
-    
-    public AuthController(JwtService jwtService, IMapper mapper, IAuthService authService)
-    {
-        _service = jwtService;
-        _mapper = mapper;
-        _authService = authService;
-    }  
-    
+    private readonly IUserService _userService = userService;
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserLoginRequestDto request)
     {
-        var userDto = await _authService.LoginAsync(request.Email, request.Password);
-        if (userDto == null)
-            return Unauthorized(new { message = "Invalid credentials" });
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        var token = await _userService.LoginAsync(request);
 
-        return Ok(new { User = userDto });
+        return Ok(token);
     }
     
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserRegisterRequestDto request)
     {
-        var userDto = await _authService.RegisterAsync(request);
-        if (userDto == null)
-            return BadRequest(new { message = "Email already exists" });
-        
 
-        return Ok(new { User = userDto });
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        await _userService.RegisterAsync(request);
+        
+        return Ok();
     }
     
 }

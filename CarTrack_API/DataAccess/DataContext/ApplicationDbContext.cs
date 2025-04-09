@@ -1,4 +1,5 @@
-﻿using CarTrack_API.Models;
+﻿using CarTrack_API.EntityLayer.Models;
+using CarTrack_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarTrack_API.DataAccess.DataContext;

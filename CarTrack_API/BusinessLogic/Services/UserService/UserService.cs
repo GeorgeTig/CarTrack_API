@@ -1,28 +1,27 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using AutoMapper;
-using CarTrack_API.BusinessLogic.Services.UserRoleService;
-using CarTrack_API.DataAccess.Dtos.RegisterDtos;
+using CarTrack_API.BusinessLogic.Mapping;
+using CarTrack_API.BusinessLogic.Services.ClientProfileService;
+using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
-using CarTrack_API.DataAccess.Repositories.UserRoleRepository;
+using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
+using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
+using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
+using CarTrack_API.EntityLayer.Exceptions.UserRoleExceptions;
 using CarTrack_API.Models;
 
 
 namespace CarTrack_API.BusinessLogic.Services.UserService;
 
-public class UserService : IUserService
+public class UserService(IUserRepository userRepository, IJwtService jwtService, IClientProfileService clientProfileService, IManagerProfileService managerProfileService) : IUserService
 {
     
-    private readonly IUserRepository _userRepository;
-    private readonly IUserRoleService _userRoleService;
-    private readonly IMapper _mapper;
+    private readonly IUserRepository _userRepository = userRepository;
+    private readonly IJwtService _jwtService = jwtService;
+    private readonly IClientProfileService _clientProfileService = clientProfileService;
+    private readonly IManagerProfileService _managerProfileService = managerProfileService;
     
-    public UserService(IUserRepository userRepository, IMapper mapper, IUserRoleService userRoleService)
-    {
-        _userRepository = userRepository;
-        _mapper = mapper;
-        _userRoleService = userRoleService;
-    }
+
 
     public async Task<User?> ValidateUserAsync(string email, string password)
     {
@@ -48,52 +47,61 @@ public class UserService : IUserService
         var hashedInput = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(inputPassword)));
         return hashedInput == storedPassword;
     }
-    
-    public async Task<bool> EmailExistsAsync(string email)
+
+   
+    public async Task<string?> LoginAsync(UserLoginRequestDto loginUser)
     {
-        return await _userRepository.GetByEmailAsync(email) != null;
-    }
-    
-    public async Task<UserRegisterResponseDto?> RegisterUserAsync(UserRegisterRequestDto registerUser)
-    {
-        if (await EmailExistsAsync(registerUser.Email))
+        var user = await ValidateUserAsync(loginUser.Email, loginUser.Password);
+        if (user == null)
         {
             return null;
         }
         
-        using var sha256 = SHA256.Create();
-        var hashedPassword = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(registerUser.Password)));
-        registerUser.Password = hashedPassword;
-        
-        var user = _mapper.Map<User>(registerUser);
-        if (user.Role.Role.ToLower() == "client")
-        {
-            user.ClientProfile = new ClientProfile
-            {
-                User = user,
-                UserId = user.Id
-            };
-        }
-        else if (user.Role.Role.ToLower() == "manager")
-        {
-            user.ManagerProfile = new ManagerProfile
-            {
-                User = user,
-                UserId = user.Id
-            };
-        }
-        else
-        {
-            user.MechanicProfile = new MechanicProfile
-            {
-                User = user,
-                UserId = user.Id
-            };
-        }
+        var token = _jwtService.GenerateJwtToken(user);
 
-        await _userRepository.AddUserAsync(user);
+        return token;
+    }
+    
+    public async Task RegisterAsync(UserRegisterRequestDto registerUser)
+    {
+
+        try
+        {
+            using var sha256 = SHA256.Create();
+            var hashedPassword =
+                Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(registerUser.Password)));
+            registerUser.Password = hashedPassword;
+            var user = registerUser.ToUser();
+            await _userRepository.AddUserAsync(user);
+
+            if (user.Id == 1)
+            {
+                var clientProfile = new ClientProfile
+                {
+                    UserId = user.Id,
+                };
+
+                await _clientProfileService.AddClientProfileAsync(clientProfile);
+            }
+            else if (user.Id == 2)
+            {
+                var managerProfile = new ManagerProfile
+                {
+                    UserId = user.Id,
+                };
+
+                await _managerProfileService.AddManagerProfileAsync(managerProfile);
+            }
+        }
+        catch (UserAlreadyExistException)
+        {
+            throw;
+        }
+        catch (UserRoleNotFoundException)
+        {
+            throw;
+        }
         
-        return _mapper.Map<UserRegisterResponseDto>(user);
     }
     
 }

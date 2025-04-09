@@ -1,6 +1,6 @@
 ﻿namespace CarTrack_API.BusinessLogic.Services.UserRoleService;
 
-public class UserRoleService
+public class UserRoleService : IUserRoleService
 {
     
 }
