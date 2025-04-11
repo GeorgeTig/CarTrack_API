@@ -15,7 +15,8 @@ public static class MappingVehicle
                 Id = item.Id,
                 Vin = item.Vin,
                 Mileage = item.Mileage,
-                ModelName = item.VehicleModel.SeriesName
+                ModelName = item.VehicleModel.SeriesName,
+                Year = item.VehicleModel.Year
             };
             vehicleResponseDtos.Add(vehicleResponseDto);
         }

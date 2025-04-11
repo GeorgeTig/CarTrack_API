@@ -6,4 +6,5 @@ public class VehicleResponseDto
     public string Vin { get; set; }
     public int Mileage { get; set; }
     public required string ModelName { get; set; }
+    public int Year { get; set; }
 }
