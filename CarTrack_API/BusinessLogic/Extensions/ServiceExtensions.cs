@@ -4,7 +4,9 @@ using CarTrack_API.BusinessLogic.Services.JwtService;
 using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
 using CarTrack_API.BusinessLogic.Services.UserRoleService;
 using CarTrack_API.BusinessLogic.Services.UserService;
+using CarTrack_API.BusinessLogic.Services.VehicleModelService;
 using CarTrack_API.BusinessLogic.Services.VehicleService;
+using CarTrack_API.BusinessLogic.Services.VinDecoderService;
 using CarTrack_API.DataAccess.Repositories.AppointmentRepository;
 using CarTrack_API.DataAccess.Repositories.BodyRepository;
 using CarTrack_API.DataAccess.Repositories.ClientProfileRepository;
@@ -34,7 +36,9 @@ public static class ServiceExtensions
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IUserRoleService, UserRoleService>();
+        services.AddScoped<IVehicleModelService, VehicleModelService>();
         services.AddScoped<IVehicleService, VehicleService>();
+        services.AddScoped<IVinDecoderService, VinDecoderService>();
 
         // Add repositories
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();

@@ -12,6 +12,7 @@ public class UserRepository(ApplicationDbContext context) : BaseRepository.BaseR
     
     public async Task<User?> GetByEmailAsync(string email)
     {
+        
        var user = await _context.User
                 .Include(u => u.Role)
                 .Include(u => u.ClientProfile)

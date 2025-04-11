@@ -14,6 +14,14 @@ namespace CarTrack_API.Migrations
                 name: "UserName",
                 table: "User",
                 newName: "Username");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Vin",
+                table: "Vehicle",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "integer");
         }
 
         /// <inheritdoc />
@@ -23,6 +31,14 @@ namespace CarTrack_API.Migrations
                 name: "Username",
                 table: "User",
                 newName: "UserName");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "Vin",
+                table: "Vehicle",
+                type: "integer",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "text");
         }
     }
 }

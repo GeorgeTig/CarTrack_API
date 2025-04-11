@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250318165746_mig9")]
+    [Migration("20250409170827_mig9")]
     partial class mig9
     {
         /// <inheritdoc />
@@ -38,6 +38,146 @@ namespace CarTrack_API.Migrations
                     b.HasIndex("DealId");
 
                     b.ToTable("AppointmentDeal");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Body", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BodyType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DoorNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SeatNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Body");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClientId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Mileage")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("VehicleModelId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Vin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("VehicleModelId");
+
+                    b.ToTable("Vehicle");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.VehicleEngine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Cylinders")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DriveType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EngineType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FuelType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Horsepower")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Size")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("TorqueFtLbs")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Transmission")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VehicleEngine");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.VehicleModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BodyId")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("Consumption")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("FuelTankCapacity")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ModelFullName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProducerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SeriesName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("VehicleEngineId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BodyId");
+
+                    b.HasIndex("ProducerId");
+
+                    b.HasIndex("VehicleEngineId");
+
+                    b.ToTable("VehicleModel");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.Appointment", b =>
@@ -87,29 +227,6 @@ namespace CarTrack_API.Migrations
                     b.HasIndex("VehicleId");
 
                     b.ToTable("Appointment");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.Body", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("BodyType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("DoorNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SeatNumber")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Body");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.ClientProfile", b =>
@@ -336,122 +453,6 @@ namespace CarTrack_API.Migrations
                     b.ToTable("UserRole");
                 });
 
-            modelBuilder.Entity("CarTrack_API.Models.Vehicle", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ClientId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Mileage")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("VehicleModelId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Vin")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("VehicleModelId");
-
-                    b.ToTable("Vehicle");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.VehicleEngine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Cylinders")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DriveType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EngineType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FuelType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Horsepower")
-                        .HasColumnType("integer");
-
-                    b.Property<double>("Size")
-                        .HasColumnType("double precision");
-
-                    b.Property<int>("TorqueFtLbs")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Transmission")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VehicleEngine");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.VehicleModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BodyId")
-                        .HasColumnType("integer");
-
-                    b.Property<long>("Consumption")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("FuelTankCapacity")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("ModelFullName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProducerId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SeriesName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("VehicleEngineId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BodyId");
-
-                    b.HasIndex("ProducerId");
-
-                    b.HasIndex("VehicleEngineId");
-
-                    b.ToTable("VehicleModel");
-                });
-
             modelBuilder.Entity("CarTrack_API.Models.VehiclePaper", b =>
                 {
                     b.Property<int>("Id")
@@ -495,6 +496,52 @@ namespace CarTrack_API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
+                {
+                    b.HasOne("CarTrack_API.Models.ClientProfile", "Client")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CarTrack_API.EntityLayer.Models.VehicleModel", "VehicleModel")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("VehicleModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("VehicleModel");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.VehicleModel", b =>
+                {
+                    b.HasOne("CarTrack_API.EntityLayer.Models.Body", "Body")
+                        .WithMany("VehicleModels")
+                        .HasForeignKey("BodyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CarTrack_API.Models.Producer", "Producer")
+                        .WithMany("VehicleModels")
+                        .HasForeignKey("ProducerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CarTrack_API.EntityLayer.Models.VehicleEngine", "VehicleEngine")
+                        .WithMany("VehicleModels")
+                        .HasForeignKey("VehicleEngineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Body");
+
+                    b.Navigation("Producer");
+
+                    b.Navigation("VehicleEngine");
+                });
+
             modelBuilder.Entity("CarTrack_API.Models.Appointment", b =>
                 {
                     b.HasOne("CarTrack_API.Models.MaintenanceRecord", "MaintenanceRecord")
@@ -515,7 +562,7 @@ namespace CarTrack_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CarTrack_API.Models.Vehicle", "Vehicle")
+                    b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", "Vehicle")
                         .WithMany("Appointments")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -558,7 +605,7 @@ namespace CarTrack_API.Migrations
                         .WithMany("MaintenanceRecords")
                         .HasForeignKey("RepairShopId");
 
-                    b.HasOne("CarTrack_API.Models.Vehicle", "Vehicle")
+                    b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", "Vehicle")
                         .WithOne("MaintenanceRecord")
                         .HasForeignKey("CarTrack_API.Models.MaintenanceRecord", "VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -630,55 +677,9 @@ namespace CarTrack_API.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("CarTrack_API.Models.Vehicle", b =>
-                {
-                    b.HasOne("CarTrack_API.Models.ClientProfile", "Client")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarTrack_API.Models.VehicleModel", "VehicleModel")
-                        .WithMany("Vehicles")
-                        .HasForeignKey("VehicleModelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("VehicleModel");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.VehicleModel", b =>
-                {
-                    b.HasOne("CarTrack_API.Models.Body", "Body")
-                        .WithMany("VehicleModels")
-                        .HasForeignKey("BodyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarTrack_API.Models.Producer", "Producer")
-                        .WithMany("VehicleModels")
-                        .HasForeignKey("ProducerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CarTrack_API.Models.VehicleEngine", "VehicleEngine")
-                        .WithMany("VehicleModels")
-                        .HasForeignKey("VehicleEngineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Body");
-
-                    b.Navigation("Producer");
-
-                    b.Navigation("VehicleEngine");
-                });
-
             modelBuilder.Entity("CarTrack_API.Models.VehiclePaper", b =>
                 {
-                    b.HasOne("CarTrack_API.Models.Vehicle", "Vehicle")
+                    b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", "Vehicle")
                         .WithMany("VehiclePapers")
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -687,9 +688,28 @@ namespace CarTrack_API.Migrations
                     b.Navigation("Vehicle");
                 });
 
-            modelBuilder.Entity("CarTrack_API.Models.Body", b =>
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Body", b =>
                 {
                     b.Navigation("VehicleModels");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
+                {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("MaintenanceRecord");
+
+                    b.Navigation("VehiclePapers");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.VehicleEngine", b =>
+                {
+                    b.Navigation("VehicleModels");
+                });
+
+            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.VehicleModel", b =>
+                {
+                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("CarTrack_API.Models.ClientProfile", b =>
@@ -745,25 +765,6 @@ namespace CarTrack_API.Migrations
             modelBuilder.Entity("CarTrack_API.Models.UserRole", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.Vehicle", b =>
-                {
-                    b.Navigation("Appointments");
-
-                    b.Navigation("MaintenanceRecord");
-
-                    b.Navigation("VehiclePapers");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.VehicleEngine", b =>
-                {
-                    b.Navigation("VehicleModels");
-                });
-
-            modelBuilder.Entity("CarTrack_API.Models.VehicleModel", b =>
-                {
-                    b.Navigation("Vehicles");
                 });
 #pragma warning restore 612, 618
         }

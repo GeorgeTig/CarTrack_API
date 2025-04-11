@@ -1,6 +1,6 @@
-﻿using CarTrack_API.EntityLayer.Models;
+﻿using CarTrack_API.Models;
 
-namespace CarTrack_API.Models;
+namespace CarTrack_API.EntityLayer.Models;
 
 public class VehicleModel
 {
