@@ -2,14 +2,34 @@
 
 public class VinDecodedResponnseDto
 {
-   public int ModelId { get; set; }
-   public required string SeriesName { get; set; }
-   public int Year { get; set; }
-   public required string DriveType { get; set; }
-   public required string Cylinders { get; set; }
-   public double Size { get; set; }
-   public int Horsepower { get; set; }
-   public int TorqueFtLbs { get; set; }
-   public int Doornumber { get; set; }
-   public int Seatnumber { get; set; }
+    public string SeriesName { get; set; }
+    public string Producer { get; set; }
+
+    public List<ModelDecodedDto> VehicleModelInfo { get; set; }
+}
+
+public class ModelDecodedDto
+{
+    public int Year { get; set; }
+    public int ModelId { get; set; }
+    public List<EngineDecodedDto> EngineInfo { get; set; }
+    public List<BodyDecodedDto> BodyInfo { get; set; }
+}
+
+public class EngineDecodedDto
+{
+    public int EngineId { get; set; }
+    public required string EngineType { get; set; }
+    public required string DriveType { get; set; }
+    public double Size { get; set; }
+    public int Horsepower { get; set; }
+    public required string Transmission { get; set; }
+}
+
+public class BodyDecodedDto
+{
+    public int BodyId { get; set; }
+    public required string BodyType { get; set; }
+    public int DoorNumber { get; set; }
+    public int SeatNumber { get; set; }
 }
