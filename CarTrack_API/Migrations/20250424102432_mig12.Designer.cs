@@ -3,6 +3,7 @@ using System;
 using CarTrack_API.DataAccess.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250424102432_mig12")]
+    partial class mig12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,44 +97,6 @@ namespace CarTrack_API.Migrations
                     b.ToTable("MaintenanceType");
                 });
 
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Reminder", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<double?>("DueMileage")
-                        .HasColumnType("double precision");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("Reminder");
-                });
-
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -141,6 +106,9 @@ namespace CarTrack_API.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClientId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Mileage")
                         .HasColumnType("integer");
 
                     b.Property<int>("VehicleModelId")
@@ -228,7 +196,7 @@ namespace CarTrack_API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("DateIntervalConfig")
+                    b.Property<DateTime>("DateIntervalConfig")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsEditable")
@@ -240,7 +208,7 @@ namespace CarTrack_API.Migrations
                     b.Property<int>("MaintenanceTypeId")
                         .HasColumnType("integer");
 
-                    b.Property<double?>("MileageIntervalConfig")
+                    b.Property<double>("MileageIntervalConfig")
                         .HasColumnType("double precision");
 
                     b.Property<string>("Name")
@@ -624,9 +592,6 @@ namespace CarTrack_API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ValabilityDays")
-                        .HasColumnType("integer");
-
                     b.Property<int>("VehicleId")
                         .HasColumnType("integer");
 
@@ -650,17 +615,6 @@ namespace CarTrack_API.Migrations
                         .HasForeignKey("DealId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Reminder", b =>
-                {
-                    b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", "Vehicle")
-                        .WithMany("Reminders")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
@@ -924,8 +878,6 @@ namespace CarTrack_API.Migrations
                     b.Navigation("Appointments");
 
                     b.Navigation("MaintenanceRecord");
-
-                    b.Navigation("Reminders");
 
                     b.Navigation("VehicleInfo")
                         .IsRequired();

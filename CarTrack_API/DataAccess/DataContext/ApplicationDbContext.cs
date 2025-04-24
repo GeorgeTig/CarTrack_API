@@ -22,6 +22,12 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<VehicleEngine> VehicleEngine { get; set; }
     public DbSet<VehicleModel> VehicleModel { get; set; }
     public DbSet<VehiclePaper> VehiclePaper { get; set; }
+    public DbSet<VehicleInfo> VehicleInfo { get; set; }
+    public DbSet<VehicleUsageStats> VehicleUsageStats { get; set; }
+    public DbSet<VehicleMaintenanceConfig> VehicleMaintenanceConfig { get; set; }
+    public DbSet<MaintenanceCategory> MaintenanceCategory { get; set; }
+    public DbSet<MaintenanceType> MaintenanceType { get; set; }
+    public DbSet<Reminder> Reminder { get; set; }
     
  
 
@@ -65,7 +71,7 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(mp => mp.User)
             .WithOne(u => u.ManagerProfile)
             .HasForeignKey<ManagerProfile>(mp => mp.UserId);
-
+        
         modelBuilder.Entity<Vehicle>()
             .HasOne(v => v.Client)
             .WithMany(c => c.Vehicles)
@@ -75,6 +81,39 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(v => v.VehicleModel)
             .WithMany(vm => vm.Vehicles)
             .HasForeignKey(v => v.VehicleModelId);
+        
+        modelBuilder.Entity<Vehicle>()
+            .HasMany(v => v.Reminders)
+            .WithOne(r => r.Vehicle)
+            .HasForeignKey(r => r.VehicleId);
+        
+        modelBuilder.Entity<VehicleMaintenanceConfig>()
+            .HasOne(vc => vc.Vehicle)
+            .WithMany(v => v.VehicleMaintenanceConfigs)
+            .HasForeignKey(vc => vc.VehicleId);
+        
+        modelBuilder.Entity<VehicleMaintenanceConfig>()
+            .HasOne(vm => vm.MaintenanceCategory)
+            .WithMany(mc => mc.VehicleMaintenanceConfigs)
+            .HasForeignKey(vm => vm.MaintenanceCategoryId);
+        
+        modelBuilder.Entity<VehicleMaintenanceConfig>()
+            .HasOne(vm => vm.MaintenanceType)
+            .WithMany(mt => mt.VehicleMaintenanceConfigs)
+            .HasForeignKey(vm => vm.MaintenanceTypeId);
+        
+        modelBuilder.Entity<VehicleInfo>()
+            .HasKey(vi => vi.VehicleId);
+        
+        modelBuilder.Entity<VehicleInfo>()
+            .HasOne(vi => vi.Vehicle)
+            .WithOne(v => v.VehicleInfo)
+            .HasForeignKey<VehicleInfo>(vi => vi.VehicleId);
+        
+        modelBuilder.Entity<VehicleUsageStats>()
+            .HasOne(vu => vu.Vehicle)
+            .WithMany(v => v.VehicleUsageStats)
+            .HasForeignKey(vu => vu.VehicleId);
         
         modelBuilder.Entity<VehicleModel>()
             .HasOne(vm => vm.VehicleEngine)

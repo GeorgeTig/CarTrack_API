@@ -6,8 +6,6 @@ public class Vehicle
 {
     public int Id { get; set; }
     public string Vin { get; set; }
-    public int Mileage { get; set; }
-    
     public int ClientId { get; set; }
     public ClientProfile Client { get; set; }
     public int VehicleModelId { get; set; }
@@ -15,5 +13,9 @@ public class Vehicle
     public List<Appointment> Appointments = new();
     public List<VehiclePaper> VehiclePapers = new();
     public MaintenanceRecord MaintenanceRecord;
+    public VehicleInfo VehicleInfo { get; set; }
+    public List<VehicleUsageStats> VehicleUsageStats { get; set; }
+    public List<VehicleMaintenanceConfig> VehicleMaintenanceConfigs { get; set; }
+    public List<Reminder> Reminders { get; set; }
 
 }
