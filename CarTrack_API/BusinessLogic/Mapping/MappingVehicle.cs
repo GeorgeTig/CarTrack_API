@@ -15,7 +15,8 @@ public static class MappingVehicle
                 Id = item.Id,
                 Vin = item.Vin,
                 ModelName = item.VehicleModel.SeriesName,
-                Year = item.VehicleModel.Year
+                Year = item.VehicleModel.Year,
+                Mileage = item.VehicleInfo.Mileage
             };
             vehicleResponseDtos.Add(vehicleResponseDto);
         }
@@ -23,6 +24,22 @@ public static class MappingVehicle
 
         return vehicleResponseDtos;
     }
-    
+
+    public static Vehicle ToVehicle(this VehicleRequestDto request)
+    {
+        var vehicle = new Vehicle
+        {
+            Vin = request.Vin,
+            VehicleModelId = request.ModelId,
+            ClientId = request.ClientId,
+            VehicleInfo = new VehicleInfo
+            {
+                Mileage = request.Mileage,
+                TravelDistanceAVG = 0,
+                LastUpdate = DateTime.UtcNow
+            }
+        };
+        return vehicle;
+    }
   
 }

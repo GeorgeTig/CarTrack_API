@@ -5,8 +5,8 @@ public class VehicleMaintenanceConfig
     public int Id { get; set; }
     public required string Name { get; set; }
     
-    public DateTime? DateIntervalConfig { get; set; }
-    public double? MileageIntervalConfig { get; set; }
+    public int? DateIntervalConfig { get; set; }
+    public int? MileageIntervalConfig { get; set; }
     
     public bool IsEditable { get; set; }
     

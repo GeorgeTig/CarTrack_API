@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.BusinessLogic.Services.UserService;
+using CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ public class AuthController( IUserService userService) : ControllerBase
         }
         
         var token = await _userService.LoginAsync(request);
-
+        
         return Ok(token);
     }
     

@@ -3,6 +3,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
 using CarTrack_API.EntityLayer.Exceptions.UserRoleExceptions;
+using CarTrack_API.EntityLayer.Exceptions.VehicleException;
 
 namespace CarTrack_API.Middleware;
 
@@ -39,6 +40,16 @@ public class ExceptionMiddleware
             catch (UserRoleNotFoundException ex)
             {
                 await HandleCustomExceptionResponseAsync(context, ex, HttpStatusCode.NotFound);
+            }
+            
+            //Vehicle Exceptions//
+            catch (VehicleNotFoundException ex)
+            {
+                await HandleCustomExceptionResponseAsync(context, ex, HttpStatusCode.NotFound);
+            }
+            catch (VehicleAlreadyExistException ex)
+            {
+                await HandleCustomExceptionResponseAsync(context, ex, HttpStatusCode.Conflict);
             }
             
             // Server Exceptions //

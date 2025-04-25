@@ -92,16 +92,6 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .WithMany(v => v.VehicleMaintenanceConfigs)
             .HasForeignKey(vc => vc.VehicleId);
         
-        modelBuilder.Entity<VehicleMaintenanceConfig>()
-            .HasOne(vm => vm.MaintenanceCategory)
-            .WithMany(mc => mc.VehicleMaintenanceConfigs)
-            .HasForeignKey(vm => vm.MaintenanceCategoryId);
-        
-        modelBuilder.Entity<VehicleMaintenanceConfig>()
-            .HasOne(vm => vm.MaintenanceType)
-            .WithMany(mt => mt.VehicleMaintenanceConfigs)
-            .HasForeignKey(vm => vm.MaintenanceTypeId);
-        
         modelBuilder.Entity<VehicleInfo>()
             .HasKey(vi => vi.VehicleId);
         
@@ -178,6 +168,16 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(m => m.Vehicle)
             .WithOne(v => v.MaintenanceRecord)
             .HasForeignKey<MaintenanceRecord>(m => m.VehicleId);
+        
+        modelBuilder.Entity<MaintenanceCategory>()
+            .HasMany(m => m.VehicleMaintenanceConfigs)
+            .WithOne(vc => vc.MaintenanceCategory)
+            .HasForeignKey(vc => vc.MaintenanceCategoryId);
+        
+        modelBuilder.Entity<MaintenanceType>()
+            .HasMany(m => m.VehicleMaintenanceConfigs)
+            .WithOne(vc => vc.MaintenanceType)
+            .HasForeignKey(vc => vc.MaintenanceTypeId);
         
         base.OnModelCreating(modelBuilder);
     }
