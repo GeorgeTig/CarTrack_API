@@ -2,6 +2,7 @@
 using CarTrack_API.BusinessLogic.Services.ClientProfileService;
 using CarTrack_API.BusinessLogic.Services.JwtService;
 using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
+using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.UserRoleService;
 using CarTrack_API.BusinessLogic.Services.UserService;
 using CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
@@ -17,6 +18,7 @@ using CarTrack_API.DataAccess.Repositories.ManagerProfileRepository;
 using CarTrack_API.DataAccess.Repositories.MechanicProfileRepository;
 using CarTrack_API.DataAccess.Repositories.NotificationRepository;
 using CarTrack_API.DataAccess.Repositories.ProducerRepository;
+using CarTrack_API.DataAccess.Repositories.ReminderRepository;
 using CarTrack_API.DataAccess.Repositories.RepairShopRepository;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
 using CarTrack_API.DataAccess.Repositories.UserRoleRepository;
@@ -43,8 +45,10 @@ public static class ServiceExtensions
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IVinDecoderService, VinDecoderService>();
         services.AddScoped<IVehicleMaintenanceConfigService, VehicleMaintenanceConfigService>();
+        services.AddScoped<IReminderService, ReminderService>();
 
         // Add repositories
+        services.AddScoped<IReminderRepository, ReminderRepository>();
         services.AddScoped<IVehicleMaintenanceConfigRepository, VehicleMaintenanceConfigRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         services.AddScoped<IBodyRepository, BodyRepository>();

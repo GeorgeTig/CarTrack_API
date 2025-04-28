@@ -3,6 +3,7 @@ using System;
 using CarTrack_API.DataAccess.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250427155125_mig16")]
+    partial class mig16
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,36 +114,18 @@ namespace CarTrack_API.Migrations
                     b.Property<double?>("LastMileageCkeck")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("StatusId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int?>("VehicleId")
                         .HasColumnType("integer");
 
                     b.HasKey("VehicleMaintenanceConfigId");
 
-                    b.HasIndex("StatusId");
-
                     b.HasIndex("VehicleId");
 
                     b.ToTable("Reminder");
-                });
-
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Status", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Status");
                 });
 
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>
@@ -665,12 +650,6 @@ namespace CarTrack_API.Migrations
 
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Reminder", b =>
                 {
-                    b.HasOne("CarTrack_API.EntityLayer.Models.Status", "Status")
-                        .WithMany("Reminders")
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", null)
                         .WithMany("Reminders")
                         .HasForeignKey("VehicleId");
@@ -680,8 +659,6 @@ namespace CarTrack_API.Migrations
                         .HasForeignKey("CarTrack_API.EntityLayer.Models.Reminder", "VehicleMaintenanceConfigId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Status");
 
                     b.Navigation("VehicleMaintenanceConfig");
                 });
@@ -940,11 +917,6 @@ namespace CarTrack_API.Migrations
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.MaintenanceType", b =>
                 {
                     b.Navigation("VehicleMaintenanceConfigs");
-                });
-
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Status", b =>
-                {
-                    b.Navigation("Reminders");
                 });
 
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Vehicle", b =>

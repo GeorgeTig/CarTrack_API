@@ -28,6 +28,7 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<MaintenanceCategory> MaintenanceCategory { get; set; }
     public DbSet<MaintenanceType> MaintenanceType { get; set; }
     public DbSet<Reminder> Reminder { get; set; }
+    public DbSet<Status> Status { get; set; }
     
  
 
@@ -82,11 +83,6 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .WithMany(vm => vm.Vehicles)
             .HasForeignKey(v => v.VehicleModelId);
         
-        modelBuilder.Entity<Vehicle>()
-            .HasMany(v => v.Reminders)
-            .WithOne(r => r.Vehicle)
-            .HasForeignKey(r => r.VehicleId);
-        
         modelBuilder.Entity<VehicleMaintenanceConfig>()
             .HasOne(vc => vc.Vehicle)
             .WithMany(v => v.VehicleMaintenanceConfigs)
@@ -125,10 +121,23 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .WithMany(v => v.VehiclePapers)
             .HasForeignKey(vp => vp.VehicleId);
         
+        modelBuilder.Entity<Reminder>()
+            .HasKey(r => r.VehicleMaintenanceConfigId);
+        
+        modelBuilder.Entity<Reminder>()
+            .HasOne(r => r.VehicleMaintenanceConfig)
+            .WithOne(vc => vc.Reminder)
+            .HasForeignKey<Reminder>(r => r.VehicleMaintenanceConfigId);
+        
         modelBuilder.Entity<RepairShop>()
             .HasOne(r => r.Manager)
             .WithMany(m => m.RepairShops)
             .HasForeignKey(r => r.ManagerId);
+        
+        modelBuilder.Entity<Status>()
+            .HasMany(s => s.Reminders)
+            .WithOne(r => r.Status)
+            .HasForeignKey(r => r.StatusId);
         
         modelBuilder.Entity<Deal>()
             .HasOne(d => d.RepairShop)

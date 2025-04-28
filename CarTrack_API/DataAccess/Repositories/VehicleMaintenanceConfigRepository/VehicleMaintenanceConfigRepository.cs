@@ -10,9 +10,20 @@ public class VehicleMaintenanceConfigRepository(ApplicationDbContext context) : 
     public async Task AddAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig)
     {
         
-
         _context.VehicleMaintenanceConfig.Add(vehicleMaintenanceConfig);
         await _context.SaveChangesAsync();
+        
+        await _context.Entry(vehicleMaintenanceConfig)
+            .Reference(vmc => vmc.Vehicle)
+            .LoadAsync();
+        
+        await _context.Entry(vehicleMaintenanceConfig.Vehicle)
+            .Reference(v => v.Client)
+            .LoadAsync();
+        
+        await _context.Entry(vehicleMaintenanceConfig.Vehicle)
+            .Reference(v => v.VehicleInfo)
+            .LoadAsync();
         
     }
     

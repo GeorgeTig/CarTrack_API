@@ -16,6 +16,8 @@ public class VehicleMaintenanceConfig
     public MaintenanceCategory MaintenanceCategory { get; set; }
     public int MaintenanceCategoryId { get; set; }
     
+    public Reminder Reminder { get; set; }
+    
     public int VehicleId { get; set; }
     public Vehicle Vehicle { get; set; }
 }

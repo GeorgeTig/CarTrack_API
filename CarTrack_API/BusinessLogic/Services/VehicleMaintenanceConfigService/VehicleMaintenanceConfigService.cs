@@ -1,13 +1,15 @@
-﻿using CarTrack_API.DataAccess.Repositories.VehicleMaintenanceConfigRepository;
+﻿using CarTrack_API.BusinessLogic.Services.ReminderService;
+using CarTrack_API.DataAccess.Repositories.VehicleMaintenanceConfigRepository;
 using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
 
-public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMaintenanceConfigRepository repository)
+public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMaintenanceConfigRepository repository, IReminderService reminderService)
     : IVehicleMaintenanceConfigService
 {
     private readonly IConfiguration _config = config;
     private readonly IVehicleMaintenanceConfigRepository _repository = repository;
+    private readonly IReminderService _reminderService = reminderService;
 
 
     public async Task DefaultMaintenanceConfigAsync(int vehicleId)
@@ -26,6 +28,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilConfig);
+        await _reminderService.AddReminderAsync(oilConfig, oilConfig.Vehicle.VehicleInfo.Mileage);
 
         // Oil Transmission
         var oilTransmissionConfig = new VehicleMaintenanceConfig
@@ -39,6 +42,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilTransmissionConfig);
+        await _reminderService.AddReminderAsync(oilTransmissionConfig, oilTransmissionConfig.Vehicle.VehicleInfo.Mileage);
 
         // Oil Differential
         var oilDifferentialConfig = new VehicleMaintenanceConfig
@@ -52,6 +56,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilDifferentialConfig);
+        await _reminderService.AddReminderAsync(oilDifferentialConfig, oilDifferentialConfig.Vehicle.VehicleInfo.Mileage);
 
         // Liquid Coolant
         var liquidCoolantConfig = new VehicleMaintenanceConfig
@@ -65,6 +70,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidCoolantConfig);
+        await _reminderService.AddReminderAsync(liquidCoolantConfig, liquidCoolantConfig.Vehicle.VehicleInfo.Mileage);
 
         // Liquid Brake
         var liquidBrakeConfig = new VehicleMaintenanceConfig
@@ -78,6 +84,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidBrakeConfig);
+        await _reminderService.AddReminderAsync(liquidBrakeConfig, liquidBrakeConfig.Vehicle.VehicleInfo.Mileage);
 
         // Liquid Servo Direction
         var liquidServoDirectionConfig = new VehicleMaintenanceConfig
@@ -91,6 +98,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidServoDirectionConfig);
+        await _reminderService.AddReminderAsync(liquidServoDirectionConfig, liquidServoDirectionConfig.Vehicle.VehicleInfo.Mileage);
 
         // Filter Air
         var filterAirConfig = new VehicleMaintenanceConfig
@@ -104,6 +112,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterAirConfig);
+        await _reminderService.AddReminderAsync(filterAirConfig, filterAirConfig.Vehicle.VehicleInfo.Mileage);
 
         // Filter Fuel
         var filterFuelConfig = new VehicleMaintenanceConfig
@@ -117,6 +126,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterFuelConfig);
+        await _reminderService.AddReminderAsync(filterFuelConfig, filterFuelConfig.Vehicle.VehicleInfo.Mileage);
 
         // Filter Cabin
         var filterCabinConfig = new VehicleMaintenanceConfig
@@ -130,6 +140,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterCabinConfig);
+        await _reminderService.AddReminderAsync(filterCabinConfig, filterCabinConfig.Vehicle.VehicleInfo.Mileage);
 
         // Brake Pads
         var brakePadsConfig = new VehicleMaintenanceConfig
@@ -143,6 +154,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(brakePadsConfig);
+        await _reminderService.AddReminderAsync(brakePadsConfig, brakePadsConfig.Vehicle.VehicleInfo.Mileage);
 
         // Brake Discs
         var brakeDiscsConfig = new VehicleMaintenanceConfig
@@ -156,6 +168,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(brakeDiscsConfig);
+        await _reminderService.AddReminderAsync(brakeDiscsConfig, brakeDiscsConfig.Vehicle.VehicleInfo.Mileage);
 
         // Eri
         var eriConfig = new VehicleMaintenanceConfig
@@ -169,6 +182,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(eriConfig);
+        await _reminderService.AddReminderAsync(eriConfig, eriConfig.Vehicle.VehicleInfo.Mileage);
 
         // Battery
         var batteryConfig = new VehicleMaintenanceConfig
@@ -182,6 +196,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(batteryConfig);
+        await _reminderService.AddReminderAsync(batteryConfig, batteryConfig.Vehicle.VehicleInfo.Mileage);
 
         // Direction
         var directionConfig = new VehicleMaintenanceConfig
@@ -195,6 +210,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(directionConfig);
+        await _reminderService.AddReminderAsync(directionConfig, directionConfig.Vehicle.VehicleInfo.Mileage);
 
         // Shock Absorbers
         var shockAbsorbersConfig = new VehicleMaintenanceConfig
@@ -208,6 +224,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(shockAbsorbersConfig);
+        await _reminderService.AddReminderAsync(shockAbsorbersConfig, shockAbsorbersConfig.Vehicle.VehicleInfo.Mileage);
 
         // Clutch
         var clutchConfig = new VehicleMaintenanceConfig
@@ -221,6 +238,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(clutchConfig);
+        await _reminderService.AddReminderAsync(clutchConfig, clutchConfig.Vehicle.VehicleInfo.Mileage);
 
         // Differential
         var differentialConfig = new VehicleMaintenanceConfig
@@ -234,6 +252,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(differentialConfig);
+        await _reminderService.AddReminderAsync(differentialConfig, differentialConfig.Vehicle.VehicleInfo.Mileage);
 
         // Freon Air Conditioning
         var freonAirConditioningConfig = new VehicleMaintenanceConfig
@@ -247,6 +266,7 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             VehicleId = vehicleId
         };
         await AddConfigAsync(freonAirConditioningConfig);
+        await _reminderService.AddReminderAsync(freonAirConditioningConfig, freonAirConditioningConfig.Vehicle.VehicleInfo.Mileage);
     }
 
 
