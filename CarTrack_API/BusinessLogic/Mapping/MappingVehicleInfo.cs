@@ -1,0 +1,19 @@
+﻿using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
+using CarTrack_API.EntityLayer.Models;
+
+namespace CarTrack_API.BusinessLogic.Mapping;
+
+public static class MappingVehicleInfo
+{
+    public static VehicleInfoResponseDto ToVehicleInfoResponseDto(this VehicleInfo vehicleInfo)
+    {
+        var vehicleInfoResponseDto = new VehicleInfoResponseDto
+        {
+            Mileage = vehicleInfo.Mileage,
+            TravelDistanceAVG = vehicleInfo.TravelDistanceAVG,
+            LastUpdate = vehicleInfo.LastUpdate
+        };
+
+        return vehicleInfoResponseDto;
+    }
+}

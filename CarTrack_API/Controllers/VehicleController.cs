@@ -37,4 +37,64 @@ public class VehicleController(IVehicleService vehicleService, IVehicleModelServ
         await _vehicleService.AddVehicleAsync(request);
         return Ok();
     }
+    
+    [HttpGet("engine/{vehId}")]
+    public async Task<IActionResult> GetVehicleEngineByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var vehicleEngine = await _vehicleService.GetVehicleEngineByVehicleIdAsync(vehId);
+        return Ok(vehicleEngine);
+    }
+    
+    [HttpGet("model/{vehId}")]
+    public async Task<IActionResult> GetVehicleModelByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var vehicleModel = await _vehicleService.GetVehicleModelByVehicleIdAsync( vehId);
+        return Ok(vehicleModel);
+    }
+    
+    [HttpGet("info/{vehId}")]
+    public async Task<IActionResult> GetVehicleInfoByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var vehicleInfo = await _vehicleService.GetVehicleInfoByVehicleIdAsync(vehId);
+        return Ok(vehicleInfo);
+    }
+    
+    [HttpGet("usage/{vehId}")]
+    public async Task<IActionResult> GetVehicleUsageStatsByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var vehicleUsageStats = await _vehicleService.GetVehicleUsageStatsByVehicleIdAsync(vehId);
+        return Ok(vehicleUsageStats);
+    }
+    
+    [HttpGet("body/{vehId}")]
+    public async Task<IActionResult> GetVehicleBodyByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var vehicleBody = await _vehicleService.GetVehicleBodyByVehicleIdAsync(vehId);
+        return Ok(vehicleBody);
+    }
 }

@@ -65,4 +65,74 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
         _context.Vehicle.Add(vehicle);
         await _context.SaveChangesAsync();
     }
+    
+    public async Task<VehicleEngine> GetVehicleEngineByVehicleIdAsync(int vehId)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.VehicleModel.VehicleEngine)
+            .FirstOrDefaultAsync(v => v.Id == vehId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
+        }
+        
+        return vehicle.VehicleModel.VehicleEngine;
+    }
+    
+    public async Task<VehicleInfo> GetVehicleInfoByVehicleIdAsync(int vehId)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.VehicleInfo)
+            .FirstOrDefaultAsync(v => v.Id == vehId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
+        }
+        
+        return vehicle.VehicleInfo;
+    }
+    
+    public async Task<VehicleModel> GetVehicleModelByVehicleIdAsync(int vehId)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.VehicleModel)
+            .FirstOrDefaultAsync(v => v.Id == vehId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
+        }
+        
+        return vehicle.VehicleModel;
+    }
+    
+    public async Task<List<VehicleUsageStats>> GetVehicleUsageStatsByVehicleIdAsync(int vehId)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.VehicleUsageStats)
+            .FirstOrDefaultAsync(v => v.Id == vehId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
+        }
+        
+        return vehicle.VehicleUsageStats;
+    }
+    
+    public async Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.VehicleModel.Body)
+            .FirstOrDefaultAsync(v => v.Id == vehId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
+        }
+        
+        return vehicle.VehicleModel.Body;
+    }
 }

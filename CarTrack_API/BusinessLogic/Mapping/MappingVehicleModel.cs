@@ -1,4 +1,5 @@
-﻿using CarTrack_API.EntityLayer.Dtos.VinDto.VinDecodedDto;
+﻿using CarTrack_API.EntityLayer.Dtos.VehicleModelDto;
+using CarTrack_API.EntityLayer.Dtos.VinDto.VinDecodedDto;
 using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Mapping;
@@ -51,5 +52,19 @@ public static class MappingVehicleModel
       }
 
       return vinDecodedDtos;
+   }
+
+   public static VehicleModelResponseDto ToVehicleModelResponseDto(this VehicleModel vehicleModel)
+   {
+      var response = new VehicleModelResponseDto
+      {
+         Id = vehicleModel.Id,
+         ModelName = vehicleModel.ModelFullName,
+         Series = vehicleModel.SeriesName,
+         Year = vehicleModel.Year,
+         FuelTankCapacity = vehicleModel.FuelTankCapacity,
+         Consumption = vehicleModel.Consumption
+      };
+      return response;
    }
 }

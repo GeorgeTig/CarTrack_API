@@ -1,6 +1,6 @@
 ﻿namespace CarTrack_API.EntityLayer.Dtos.BodyDto;
 
-public class BodyDto
+public class BodyResponseDto
 {
     public int Id { get; set; }
     public string BodyType { get; set; } 
