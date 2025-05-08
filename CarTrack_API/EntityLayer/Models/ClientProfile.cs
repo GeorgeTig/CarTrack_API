@@ -1,6 +1,4 @@
-﻿using CarTrack_API.EntityLayer.Models;
-
-namespace CarTrack_API.Models;
+﻿namespace CarTrack_API.EntityLayer.Models;
 
 public class ClientProfile
 {

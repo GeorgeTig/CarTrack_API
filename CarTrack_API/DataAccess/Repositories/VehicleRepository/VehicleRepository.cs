@@ -13,7 +13,7 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
             .Include(v=> v.VehicleModel)
             .Include(v => v.Client)
             .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceRecord)
+            .Include(v => v.MaintenanceVerifiedRecord)
             .Include(v => v.VehiclePapers)
             .Include(v => v.VehicleInfo)
             .Where(v => v.ClientId == clientId).ToList());
@@ -25,7 +25,7 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
             .Include(v => v.VehicleModel)
             .Include(v => v.Client)
             .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceRecord)
+            .Include(v => v.MaintenanceVerifiedRecord)
             .Include(v => v.VehiclePapers)
             .Include(v => v.VehicleInfo)
             .FirstOrDefaultAsync(v => v.Id == id);
@@ -44,22 +44,21 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
             .Include(v => v.VehicleModel)
             .Include(v => v.Client)
             .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceRecord)
+            .Include(v => v.MaintenanceVerifiedRecord)
             .Include(v => v.VehiclePapers)
             .Include(v => v.VehicleInfo)
-            .FirstOrDefaultAsync(v => v.Vin == vin);
+            .FirstOrDefaultAsync(v => v.VehicleInfo.Vin == vin);
         
         return vehicle;
     }
     
     public async Task AddVehicleAsync(Vehicle vehicle)
     {
-        var veh = await GetByVinAsync(vehicle.Vin);
+        var veh = await GetByVinAsync(vehicle.VehicleInfo.Vin);
         
         if ( veh != null)
         {
-            throw new VehicleAlreadyExistException($"Vehicle with vin {veh.Vin} already exits!");
-            return;
+            throw new VehicleAlreadyExistException($"Vehicle with vin {veh.VehicleInfo.Vin} already exits!");
         }
         
         _context.Vehicle.Add(vehicle);
@@ -135,4 +134,5 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
         
         return vehicle.VehicleModel.Body;
     }
+    
 }

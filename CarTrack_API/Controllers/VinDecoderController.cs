@@ -1,5 +1,4 @@
-﻿using CarTrack_API.BusinessLogic.Services.VehicleModelService;
-using CarTrack_API.BusinessLogic.Services.VinDecoderService;
+﻿using CarTrack_API.BusinessLogic.Services.VinDecoderService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,7 +30,7 @@ public class VinDecoderController(IVinDecoderService vinDecoderService): Control
 
         var vinDecoded = await _vinDecoderService.DecodeVinAsync(vin);
         
-        if (vinDecoded == null || vinDecoded.Count == 0)
+        if (vinDecoded.Count == 0)
         {
             return BadRequest(ModelState);
         }

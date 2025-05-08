@@ -3,7 +3,7 @@
 public class VehicleEngine
 {
     public int Id { get; set; }
-    public required string EngineType { get; set; }
+    public required string EngineType { get; set; } // gas , diesel...
     public required string FuelType { get; set; }
     public required string Cylinders { get; set; }
     public double Size { get; set; } // Engine size in Liters

@@ -3,6 +3,5 @@
 public class VehicleInfoResponseDto
 {
    public double Mileage { get; set; }
-   public double TravelDistanceAVG { get; set; }
-   public DateTime LastUpdate { get; set; }
+   public string Vin { get; set; } = string.Empty;
 }

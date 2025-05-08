@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace CarTrack_API.Models;
+﻿namespace CarTrack_API.EntityLayer.Models;
 
 public class User
 {

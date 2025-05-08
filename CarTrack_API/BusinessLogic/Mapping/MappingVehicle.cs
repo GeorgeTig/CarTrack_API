@@ -13,7 +13,7 @@ public static class MappingVehicle
             var vehicleResponseDto = new VehicleResponseDto
             {
                 Id = item.Id,
-                Vin = item.Vin,
+                Vin = item.VehicleInfo.Vin,
                 Series = item.VehicleModel.SeriesName,
                 Year = item.VehicleModel.Year
             };
@@ -28,14 +28,12 @@ public static class MappingVehicle
     {
         var vehicle = new Vehicle
         {
-            Vin = request.Vin,
             VehicleModelId = request.ModelId,
             ClientId = request.ClientId,
             VehicleInfo = new VehicleInfo
             {
                 Mileage = request.Mileage,
-                TravelDistanceAVG = 0,
-                LastUpdate = DateTime.UtcNow
+                Vin = request.Vin,
             }
         };
         return vehicle;

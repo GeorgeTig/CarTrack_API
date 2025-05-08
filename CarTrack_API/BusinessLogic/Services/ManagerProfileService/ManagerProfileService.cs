@@ -1,5 +1,5 @@
 ﻿using CarTrack_API.DataAccess.Repositories.ManagerProfileRepository;
-using CarTrack_API.Models;
+using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.ManagerProfileService;
 

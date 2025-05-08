@@ -1,5 +1,6 @@
 ﻿using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.DataAccess.Repositories.ReminderRepository;
+using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.ReminderService;
@@ -13,6 +14,14 @@ public class ReminderService(IReminderRepository reminderRepository) : IReminder
         var reminder = MappingReminder.ToReminder(vehicleMaintenanceConfig, vehicleMileage);
         
         await _reminderRepository.AddAsync(reminder);
+    }
+    
+    public async Task<List<ReminderResponseDto>> GetAllRemindersByVehicleIdAsync(int vehicleId)
+    {
+        var reminders = await _reminderRepository.GetAllByVehicleIdAsync(vehicleId);
+        var reminderResponseDtos = reminders.ToListReminderResponseDto();
+        
+        return reminderResponseDtos;
     }
     
 }

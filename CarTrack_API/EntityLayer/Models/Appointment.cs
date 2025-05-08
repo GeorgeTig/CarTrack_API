@@ -1,6 +1,4 @@
-﻿using CarTrack_API.EntityLayer.Models;
-
-namespace CarTrack_API.Models;
+﻿namespace CarTrack_API.EntityLayer.Models;
 
 public class Appointment
 {
@@ -22,6 +20,6 @@ public class Appointment
     public int MechanicId { get; set; }
     public MechanicProfile Mechanic { get; set; }
     public int MaintenanceRecordId { get; set; }
-    public MaintenanceRecord MaintenanceRecord { get; set; }
+    public MaintenanceVerifiedRecord MaintenanceVerifiedRecord { get; set; }
     
 }

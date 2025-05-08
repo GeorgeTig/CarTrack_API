@@ -10,8 +10,6 @@ public static class MappingVehicleInfo
         var vehicleInfoResponseDto = new VehicleInfoResponseDto
         {
             Mileage = vehicleInfo.Mileage,
-            TravelDistanceAVG = vehicleInfo.TravelDistanceAVG,
-            LastUpdate = vehicleInfo.LastUpdate
         };
 
         return vehicleInfoResponseDto;

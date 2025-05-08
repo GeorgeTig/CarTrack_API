@@ -4,7 +4,6 @@ using CarTrack_API.EntityLayer.Dtos.VehicleEngineDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
 using CarTrack_API.EntityLayer.Dtos.VehicleModelDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleUsageStatsDto;
-using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.VehicleService;
 

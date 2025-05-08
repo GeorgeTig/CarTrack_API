@@ -2,13 +2,14 @@
 using System.Text;
 using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.BusinessLogic.Services.ClientProfileService;
+using CarTrack_API.BusinessLogic.Services.JwtService;
 using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
 using CarTrack_API.EntityLayer.Exceptions.UserRoleExceptions;
-using CarTrack_API.Models;
+using CarTrack_API.EntityLayer.Models;
 
 
 namespace CarTrack_API.BusinessLogic.Services.UserService;

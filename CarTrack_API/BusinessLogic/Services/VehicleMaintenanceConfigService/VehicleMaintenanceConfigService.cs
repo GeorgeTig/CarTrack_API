@@ -24,7 +24,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Oil:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Oil:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Oil:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilConfig);
@@ -38,7 +37,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Oil_Transmission:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Oil_Transmission:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Oil_Transmission:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilTransmissionConfig);
@@ -52,7 +50,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Oil_Differential:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Oil_Differential:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Oil_Differential:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(oilDifferentialConfig);
@@ -66,7 +63,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_Coolant:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_Coolant:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Liquid_Coolant:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidCoolantConfig);
@@ -80,7 +76,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_Brake:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_Brake:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Liquid_Brake:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidBrakeConfig);
@@ -94,7 +89,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_ServoDirection:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_ServoDirection:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Liquid_ServoDirection:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(liquidServoDirectionConfig);
@@ -108,7 +102,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Air:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Air:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Filter_Air:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterAirConfig);
@@ -122,7 +115,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Fuel:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Fuel:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Filter_Fuel:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterFuelConfig);
@@ -136,7 +128,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Cabin:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Cabin:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Filter_Cabin:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(filterCabinConfig);
@@ -150,7 +141,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Brake_Pads:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Brake_Pads:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Brake_Pads:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(brakePadsConfig);
@@ -164,7 +154,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Brake_Discs:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Brake_Discs:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Brake_Discs:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(brakeDiscsConfig);
@@ -178,7 +167,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Eri:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Eri:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Eri:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(eriConfig);
@@ -192,7 +180,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Battery:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Battery:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Battery:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(batteryConfig);
@@ -206,7 +193,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Direction:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Direction:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Direction:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(directionConfig);
@@ -220,7 +206,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Shock_Absorbers:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Shock_Absorbers:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Shock_Absorbers:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(shockAbsorbersConfig);
@@ -234,7 +219,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Clutch:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Clutch:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Clutch:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(clutchConfig);
@@ -248,7 +232,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Differential:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Differential:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Differential:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(differentialConfig);
@@ -262,7 +245,6 @@ public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMain
             MileageIntervalConfig = int.Parse(maintenanceSettings["Freon_Air_Conditioning:Mileage"]),
             IsEditable = true,
             MaintenanceTypeId = int.Parse(maintenanceSettings["Freon_Air_Conditioning:TypeId"]),
-            MaintenanceCategoryId = int.Parse(maintenanceSettings["Freon_Air_Conditioning:CategoryId"]),
             VehicleId = vehicleId
         };
         await AddConfigAsync(freonAirConditioningConfig);

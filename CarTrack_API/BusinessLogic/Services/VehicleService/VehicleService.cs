@@ -8,15 +8,12 @@ using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
 using CarTrack_API.EntityLayer.Dtos.VehicleModelDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleUsageStatsDto;
 using CarTrack_API.EntityLayer.Exceptions.VehicleException;
-using CarTrack_API.EntityLayer.Models;
-using Newtonsoft.Json;
 
 namespace CarTrack_API.BusinessLogic.Services.VehicleService;
 
-public class VehicleService(IVehicleRepository vehicleRepository, HttpClient httpClient, IVehicleMaintenanceConfigService vehicleConfigService) : IVehicleService
+public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMaintenanceConfigService vehicleConfigService) : IVehicleService
 {
     private readonly IVehicleRepository _vehicleRepository = vehicleRepository;
-    private readonly HttpClient _httpClient = httpClient;
     private readonly IVehicleMaintenanceConfigService _vehicleConfigService = vehicleConfigService;
     
     public async Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int id)

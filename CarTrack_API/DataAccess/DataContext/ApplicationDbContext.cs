@@ -1,5 +1,4 @@
 ﻿using CarTrack_API.EntityLayer.Models;
-using CarTrack_API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarTrack_API.DataAccess.DataContext;
@@ -10,7 +9,7 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<Body> Body { get; set; }
     public DbSet<ClientProfile> ClientProfile { get; set; }
     public DbSet<Deal> Deal { get; set; }
-    public DbSet<MaintenanceRecord> MaintenanceRecord { get; set; }
+    public DbSet<MaintenanceVerifiedRecord> MaintenanceRecord { get; set; }
     public DbSet<ManagerProfile> ManagerProfile { get; set; }
     public DbSet<MechanicProfile> MechanicProfile { get; set; }
     public DbSet<Notification> Notification { get; set; }
@@ -25,7 +24,6 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<VehicleInfo> VehicleInfo { get; set; }
     public DbSet<VehicleUsageStats> VehicleUsageStats { get; set; }
     public DbSet<VehicleMaintenanceConfig> VehicleMaintenanceConfig { get; set; }
-    public DbSet<MaintenanceCategory> MaintenanceCategory { get; set; }
     public DbSet<MaintenanceType> MaintenanceType { get; set; }
     public DbSet<Reminder> Reminder { get; set; }
     public DbSet<Status> Status { get; set; }
@@ -160,7 +158,7 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasForeignKey(a => a.VehicleId);
         
         modelBuilder.Entity<Appointment>()
-            .HasOne(a => a.MaintenanceRecord)
+            .HasOne(a => a.MaintenanceVerifiedRecord)
             .WithMany(m => m.Appointments)
             .HasForeignKey(a => a.MaintenanceRecordId);
         
@@ -173,15 +171,15 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
                 j => j.HasOne<Appointment>().WithMany().HasForeignKey("AppointmentId") 
             );
 
-        modelBuilder.Entity<MaintenanceRecord>()
+        modelBuilder.Entity<MaintenanceVerifiedRecord>()
             .HasOne(m => m.Vehicle)
-            .WithOne(v => v.MaintenanceRecord)
-            .HasForeignKey<MaintenanceRecord>(m => m.VehicleId);
+            .WithMany(v => v.MaintenanceVerifiedRecord)
+            .HasForeignKey(m => m.VehicleId);
         
-        modelBuilder.Entity<MaintenanceCategory>()
-            .HasMany(m => m.VehicleMaintenanceConfigs)
-            .WithOne(vc => vc.MaintenanceCategory)
-            .HasForeignKey(vc => vc.MaintenanceCategoryId);
+        modelBuilder.Entity<MaintenanceUnverifiedRecord>()
+            .HasOne(m => m.Vehicle)
+            .WithMany(v => v.MaintenanceUnverifiedRecord)
+            .HasForeignKey(m => m.VehicleId);
         
         modelBuilder.Entity<MaintenanceType>()
             .HasMany(m => m.VehicleMaintenanceConfigs)

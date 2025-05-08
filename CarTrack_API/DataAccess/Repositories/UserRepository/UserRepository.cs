@@ -1,7 +1,7 @@
 ﻿using CarTrack_API.DataAccess.DataContext;
 using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
 using CarTrack_API.EntityLayer.Exceptions.UserRoleExceptions;
-using CarTrack_API.Models;
+using CarTrack_API.EntityLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarTrack_API.DataAccess.Repositories.UserRepository;

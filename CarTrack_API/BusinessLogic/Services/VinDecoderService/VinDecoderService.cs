@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Xml;
 using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.BusinessLogic.Services.VehicleModelService;
 using CarTrack_API.EntityLayer.Dtos.VinDto.VinDecodedDto;
@@ -47,7 +46,7 @@ public class VinDecoderService(HttpClient httpClient, IVehicleModelService vehic
         dto.Series = NormalizeString(dto.Series);
         dto.Cylinders = NormalizeCylinders(dto.Cylinders, dto.CylinderPlacement);
         dto.Transmission = NormalizeTransmission(dto.Transmission, dto.TransmissionSpeeds);
-        dto.Year = dto.Year?.Trim();
+        dto.Year = dto.Year.Trim();
 
         return dto;
     }

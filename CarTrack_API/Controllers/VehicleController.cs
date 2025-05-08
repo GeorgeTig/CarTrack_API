@@ -1,4 +1,4 @@
-﻿using CarTrack_API.BusinessLogic.Services.VehicleModelService;
+﻿using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleService;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using Microsoft.AspNetCore.Authorization;
@@ -8,11 +8,11 @@ namespace CarTrack_API.Controllers;
 
 [Authorize(Roles = "client")]
 [Route("api/vehicle")]
-public class VehicleController(IVehicleService vehicleService, IVehicleModelService vehicleModelService)
+public class VehicleController(IVehicleService vehicleService, IReminderService reminderService)
     : ControllerBase
 {
     private readonly IVehicleService _vehicleService = vehicleService;
-    private readonly IVehicleModelService _vehicleModelService = vehicleModelService;
+    private readonly IReminderService _reminderService = reminderService;
 
     [HttpGet("{clientId}")]
     public ActionResult<List<VehicleResponseDto>> GetAll([FromRoute] int clientId)
@@ -96,5 +96,17 @@ public class VehicleController(IVehicleService vehicleService, IVehicleModelServ
 
         var vehicleBody = await _vehicleService.GetVehicleBodyByVehicleIdAsync(vehId);
         return Ok(vehicleBody);
+    }
+    
+    [HttpGet("reminders/{vehId}")]
+    public async Task<IActionResult> GetRemindersByVehicleId([FromRoute] int vehId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var reminders = await _reminderService.GetAllRemindersByVehicleIdAsync(vehId);
+        return Ok(reminders);
     }
 }

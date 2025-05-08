@@ -1,7 +1,7 @@
 ﻿    using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
-    using CarTrack_API.Models;
+    using CarTrack_API.EntityLayer.Models;
     using Microsoft.IdentityModel.Tokens;
 
     namespace CarTrack_API.BusinessLogic.Services.JwtService
