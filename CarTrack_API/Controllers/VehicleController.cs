@@ -1,5 +1,6 @@
 ﻿using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleService;
+using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -108,5 +109,42 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
 
         var reminders = await _reminderService.GetAllRemindersByVehicleIdAsync(vehId);
         return Ok(reminders);
+    }
+    
+    [HttpPost("update/reminder")]
+    public async Task<IActionResult> UpdateReminder([FromBody] ReminderRequestDto request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        await _reminderService.UpdateReminderAsync(request);
+        
+        return Ok();
+    }
+    
+    [HttpPost("update/reminder{reminderId}/default")]
+    public async Task<IActionResult> UpdateReminderDefault([FromRoute] int reminderId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+        
+        return Ok();
+    }
+    
+    [HttpPost("update/reminder{reminderId}/active")]
+    public async Task<IActionResult> UpdateReminderActive([FromRoute] int reminderId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
+       await _reminderService.UpdateReminderActiveAsync(reminderId);
+        return Ok();
     }
 }

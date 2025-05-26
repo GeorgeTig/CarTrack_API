@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.DataAccess.DataContext;
+using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,5 +25,41 @@ public class ReminderRepository(ApplicationDbContext context) : BaseRepository.B
             .ToListAsync();
         
         return reminders;
+    }
+    
+    public async Task UpdateReminderAsync(ReminderRequestDto reminderRequest)
+    {
+        var reminder = await _context.Reminder
+            .Include(r => r.VehicleMaintenanceConfig)
+            .FirstOrDefaultAsync(r => r.VehicleMaintenanceConfig.Id == reminderRequest.Id);
+        
+        if (reminder != null)
+        {
+            reminder.VehicleMaintenanceConfig.MileageIntervalConfig = reminderRequest.MileageInterval;
+            reminder.VehicleMaintenanceConfig.DateIntervalConfig = reminderRequest.TimeInterval;
+            _context.Reminder.Update(reminder);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new KeyNotFoundException($"Reminder with ID {reminderRequest.Id} not found.");
+        }
+    }
+    
+    public async Task UpdateReminderActiveAsync(int reminderId)
+    {
+        var reminder = await _context.Reminder
+            .FirstOrDefaultAsync(r => r.VehicleMaintenanceConfig.Id == reminderId);
+        
+        if (reminder != null)
+        {
+            reminder.IsActive = !reminder.IsActive;
+            _context.Reminder.Update(reminder);
+            await _context.SaveChangesAsync();
+        }
+        else
+        {
+            throw new KeyNotFoundException($"Reminder with ID {reminderId} not found.");
+        }
     }
 }

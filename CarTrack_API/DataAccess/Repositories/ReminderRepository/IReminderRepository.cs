@@ -1,4 +1,5 @@
-﻿using CarTrack_API.EntityLayer.Models;
+﻿using CarTrack_API.EntityLayer.Dtos.ReminderDto;
+using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.DataAccess.Repositories.ReminderRepository;
 
@@ -6,4 +7,6 @@ public interface IReminderRepository
 {
     Task AddAsync(Reminder reminder);
     Task<List<Reminder>> GetAllByVehicleIdAsync(int vehicleId);
+    Task UpdateReminderAsync(ReminderRequestDto reminder);
+    Task UpdateReminderActiveAsync(int reminderId);
 }

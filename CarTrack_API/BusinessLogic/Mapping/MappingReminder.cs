@@ -38,6 +38,7 @@ public static class MappingReminder
                 IsEditable = reminder.VehicleMaintenanceConfig.IsEditable,
                 DueMileage = reminder.LastMileageCkeck + reminder.VehicleMaintenanceConfig.MileageIntervalConfig,
                 DueDate = reminder.LastDateCheck.AddDays(reminder.VehicleMaintenanceConfig.DateIntervalConfig),
+                IsActive = reminder.IsActive,
             };
             reminderResponseDtos.Add(reminderResponseDto);
         }

@@ -7,4 +7,6 @@ public interface IReminderService
 {
     Task AddReminderAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig, double vehicleMileage);
     Task<List<ReminderResponseDto>> GetAllRemindersByVehicleIdAsync(int vehicleId);
+    Task UpdateReminderAsync(ReminderRequestDto reminderRequest);
+    Task UpdateReminderActiveAsync(int reminderId);
 }

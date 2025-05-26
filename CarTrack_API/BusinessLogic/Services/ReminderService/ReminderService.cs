@@ -24,4 +24,13 @@ public class ReminderService(IReminderRepository reminderRepository) : IReminder
         return reminderResponseDtos;
     }
     
+   public async Task UpdateReminderAsync(ReminderRequestDto reminderRequest)
+    {
+        await _reminderRepository.UpdateReminderAsync(reminderRequest);
+    }
+    
+   public async Task UpdateReminderActiveAsync(int reminderId)
+    {
+        await _reminderRepository.UpdateReminderActiveAsync(reminderId);
+    }
 }
