@@ -33,4 +33,9 @@ public class ReminderService(IReminderRepository reminderRepository) : IReminder
     {
         await _reminderRepository.UpdateReminderActiveAsync(reminderId);
     }
+   
+    public async Task ActualizeRemindersDueAsync()
+    {
+        await _reminderRepository.ActualizeRemindersDueAsync();
+    }
 }

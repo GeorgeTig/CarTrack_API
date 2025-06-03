@@ -2,6 +2,7 @@
 using CarTrack_API.BusinessLogic.Services.ClientProfileService;
 using CarTrack_API.BusinessLogic.Services.JwtService;
 using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
+using CarTrack_API.BusinessLogic.Services.NotificationService;
 using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.UserRoleService;
 using CarTrack_API.BusinessLogic.Services.UserService;
@@ -48,6 +49,7 @@ public static class ServiceExtensions
         services.AddScoped<IVehicleMaintenanceConfigService, VehicleMaintenanceConfigService>();
         services.AddScoped<IReminderService, ReminderService>();
         services.AddScoped<IVehicleEngineService, VehicleEngineService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         // Add repositories
         services.AddScoped<IVehicleEngineRepository, VehicleEngineRepository>();

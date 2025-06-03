@@ -37,6 +37,16 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .WithMany(u => u.Notifications)
             .HasForeignKey(n => n.UserId);
         
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.Vehicle)
+            .WithMany(v => v.Notifications)
+            .HasForeignKey(n => n.VehicleId);
+        
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.Reminder)
+            .WithMany(r => r.Notifications)
+            .HasForeignKey(n => n.RemiderId);
+        
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
             .WithMany(r => r.Users)

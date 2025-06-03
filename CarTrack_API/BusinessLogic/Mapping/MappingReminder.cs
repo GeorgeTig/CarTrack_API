@@ -14,6 +14,8 @@ public static class MappingReminder
             LastDateCheck = DateTime.UtcNow,
             IsActive = true,
             StatusId = 1, // 1 is for UP_TO_DATE
+            DueMileage = config.MileageIntervalConfig,
+            DueDate = config.DateIntervalConfig
         };
 
         return reminder;
@@ -36,8 +38,8 @@ public static class MappingReminder
                 LastMileageCheck = reminder.LastMileageCkeck,
                 LastDateCheck = reminder.LastDateCheck,
                 IsEditable = reminder.VehicleMaintenanceConfig.IsEditable,
-                DueMileage = reminder.LastMileageCkeck + reminder.VehicleMaintenanceConfig.MileageIntervalConfig,
-                DueDate = reminder.LastDateCheck.AddDays(reminder.VehicleMaintenanceConfig.DateIntervalConfig),
+                DueMileage = reminder.DueMileage,
+                DueDate = DateTime.UtcNow.AddDays(reminder.DueDate),
                 IsActive = reminder.IsActive,
             };
             reminderResponseDtos.Add(reminderResponseDto);

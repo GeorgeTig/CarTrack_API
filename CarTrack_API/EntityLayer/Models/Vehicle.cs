@@ -14,6 +14,7 @@ public class Vehicle
     public VehicleInfo VehicleInfo { get; set; }
     public List<VehicleUsageStats> VehicleUsageStats { get; set; }
     public List<VehicleMaintenanceConfig> VehicleMaintenanceConfigs { get; set; }
+    public List<Notification> Notifications { get; set; }
     public List<Reminder> Reminders { get; set; }
 
 }

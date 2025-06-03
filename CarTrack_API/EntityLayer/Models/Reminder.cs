@@ -8,8 +8,13 @@ public class Reminder
     public double LastMileageCkeck { get; set; }
     public DateTime LastDateCheck { get; set; }
     
+    public double DueMileage { get; set; }
+    public int DueDate { get; set; } // in days, from the last check
+    
     public int StatusId { get; set; }
     public Status Status { get; set; }
+    
+    public List<Notification> Notifications { get; set; }
     
     public bool IsActive { get; set; }
 }

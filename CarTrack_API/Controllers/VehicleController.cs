@@ -1,4 +1,5 @@
-﻿using CarTrack_API.BusinessLogic.Services.ReminderService;
+﻿using CarTrack_API.BusinessLogic.Services.NotificationService;
+using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleService;
 using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
@@ -9,11 +10,12 @@ namespace CarTrack_API.Controllers;
 
 [Authorize(Roles = "client")]
 [Route("api/vehicle")]
-public class VehicleController(IVehicleService vehicleService, IReminderService reminderService)
+public class VehicleController(IVehicleService vehicleService, IReminderService reminderService, INotificationService notificationService)
     : ControllerBase
 {
     private readonly IVehicleService _vehicleService = vehicleService;
     private readonly IReminderService _reminderService = reminderService;
+    private readonly INotificationService _notificationService = notificationService;
 
     [HttpGet("{clientId}")]
     public ActionResult<List<VehicleResponseDto>> GetAll([FromRoute] int clientId)
@@ -146,5 +148,17 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         
        await _reminderService.UpdateReminderActiveAsync(reminderId);
         return Ok();
+    }
+    
+    [HttpGet("{clientId}/notifications")]
+    public async Task<IActionResult> GetNotificationsByClientId([FromRoute] int clientId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var notifications = await _notificationService.GetAllNotificationsAsync(clientId);
+        return Ok(notifications);
     }
 }

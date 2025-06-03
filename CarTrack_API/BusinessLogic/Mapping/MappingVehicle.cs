@@ -34,6 +34,7 @@ public static class MappingVehicle
             {
                 Mileage = request.Mileage,
                 Vin = request.Vin,
+                AverageTravelDistance = 60 // default 60 km/day
             }
         };
         return vehicle;
