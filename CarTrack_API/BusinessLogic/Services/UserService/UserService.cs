@@ -4,7 +4,9 @@ using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.BusinessLogic.Services.ClientProfileService;
 using CarTrack_API.BusinessLogic.Services.JwtService;
 using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
+using CarTrack_API.DataAccess.Repositories.RefreshTokenRepository;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
+using CarTrack_API.EntityLayer.Dtos.Auth;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
@@ -14,13 +16,14 @@ using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.UserService;
 
-public class UserService(IUserRepository userRepository, IJwtService jwtService, IClientProfileService clientProfileService, IManagerProfileService managerProfileService) : IUserService
+public class UserService(IRefreshTokenRepository refreshTokenRepository, IUserRepository userRepository, IJwtService jwtService, IClientProfileService clientProfileService, IManagerProfileService managerProfileService) : IUserService
 {
     
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IJwtService _jwtService = jwtService;
     private readonly IClientProfileService _clientProfileService = clientProfileService;
     private readonly IManagerProfileService _managerProfileService = managerProfileService;
+    private readonly IRefreshTokenRepository _refreshTokenRepository = refreshTokenRepository;
     
 
 
@@ -50,17 +53,26 @@ public class UserService(IUserRepository userRepository, IJwtService jwtService,
     }
 
    
-    public async Task<string?> LoginAsync(UserLoginRequestDto loginUser)
+    public async Task<AuthResponseDto?> LoginAsync(UserLoginRequestDto loginUser)
     {
         var user = await ValidateUserAsync(loginUser.Email, loginUser.Password);
         if (user == null)
         {
             return null;
         }
-        
-        var token = _jwtService.GenerateJwtToken(user);
 
-        return token;
+        var accessToken = _jwtService.GenerateJwtToken(user);
+        var refreshToken = _jwtService.GenerateRefreshToken();
+
+        var refreshTokenEntity = MappingRefreshToken.ToRefreshToken(refreshToken,user);
+
+        await _refreshTokenRepository.UpdateRefreshTokenAsync(refreshTokenEntity);
+
+        return new AuthResponseDto
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
+        };
     }
     
     public async Task RegisterAsync(UserRegisterRequestDto registerUser)
@@ -103,6 +115,11 @@ public class UserService(IUserRepository userRepository, IJwtService jwtService,
             throw;
         }
         
+    }
+    
+    public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
+    {
+        return await _jwtService.RefreshTokenAsync(refreshToken);
     }
     
 }

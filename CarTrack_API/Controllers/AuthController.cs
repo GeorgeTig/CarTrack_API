@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.BusinessLogic.Services.UserService;
+using CarTrack_API.EntityLayer.Dtos.RefreshToken;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using Microsoft.AspNetCore.Mvc;
@@ -37,5 +38,25 @@ public class AuthController( IUserService userService) : ControllerBase
         
         return Ok();
     }
+    
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+    {
+        if (string.IsNullOrEmpty(request.RefreshToken))
+        {
+            return BadRequest("Refresh token is required.");
+        }
+
+        try
+        {
+            var newTokens = await _userService.RefreshTokenAsync(request.RefreshToken);
+            return Ok(newTokens);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
+
     
 }

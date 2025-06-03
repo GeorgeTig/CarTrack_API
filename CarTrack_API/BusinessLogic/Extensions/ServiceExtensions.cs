@@ -20,6 +20,7 @@ using CarTrack_API.DataAccess.Repositories.ManagerProfileRepository;
 using CarTrack_API.DataAccess.Repositories.MechanicProfileRepository;
 using CarTrack_API.DataAccess.Repositories.NotificationRepository;
 using CarTrack_API.DataAccess.Repositories.ProducerRepository;
+using CarTrack_API.DataAccess.Repositories.RefreshTokenRepository;
 using CarTrack_API.DataAccess.Repositories.ReminderRepository;
 using CarTrack_API.DataAccess.Repositories.RepairShopRepository;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
@@ -52,6 +53,7 @@ public static class ServiceExtensions
         services.AddScoped<INotificationService, NotificationService>();
 
         // Add repositories
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IVehicleEngineRepository, VehicleEngineRepository>();
         services.AddScoped<IReminderRepository, ReminderRepository>();
         services.AddScoped<IVehicleMaintenanceConfigRepository, VehicleMaintenanceConfigRepository>();

@@ -28,6 +28,8 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<Reminder> Reminder { get; set; }
     public DbSet<Status> Status { get; set; }
     
+    public DbSet<RefreshToken> RefreshToken { get; set; }
+    
  
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,6 +53,11 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(u => u.Role)
             .WithMany(r => r.Users)
             .HasForeignKey(u => u.RoleId);
+        
+        modelBuilder.Entity<User>()
+            .HasOne(u =>u.RefreshToken)
+            .WithOne(rt => rt.User)
+            .HasForeignKey<RefreshToken>(rt => rt.UserId);
 
         modelBuilder.Entity<ClientProfile>()
             .HasKey(cp => cp.UserId);

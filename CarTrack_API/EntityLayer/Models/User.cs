@@ -14,6 +14,7 @@ public class User
     public ManagerProfile ManagerProfile { get; set; }
     public MechanicProfile MechanicProfile { get; set; }
     public List<Notification> Notifications = new();
+    public RefreshToken RefreshToken { get; set; }
 
 
 }
