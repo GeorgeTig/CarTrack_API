@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CarTrack_API.Controllers;
 
 [Authorize(Roles = "client")]
-[Microsoft.AspNetCore.Components.Route("api/user")]
+[Route("api/user")]
 public class UserController (IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
