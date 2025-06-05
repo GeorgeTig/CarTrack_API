@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.EntityLayer.Dtos.BodyDto;
+using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleEngineDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
@@ -16,4 +17,5 @@ public interface IVehicleService
     Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehId);
     Task<List<VehicleUsageStatsResponseDto>> GetVehicleUsageStatsByVehicleIdAsync(int vehId);
     Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehId);
+    Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request);
 }

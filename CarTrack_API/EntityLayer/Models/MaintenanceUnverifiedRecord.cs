@@ -4,12 +4,14 @@ public class MaintenanceUnverifiedRecord
 {
     public int Id { get; set; }
     public DateTime DoneDate { get; set; }
+    public double DoneMileage { get; set; } // in km
     public decimal Cost { get; set; }
     
     public int VehicleId { get; set; }
-    public required Vehicle Vehicle { get; set; }
+    public  Vehicle Vehicle { get; set; }
     
     // An unverified maintenance can be inputed by an user 
     public List<string> MaintenanceNames { get; set; } = new();
+    public string Description { get; set; } // Optional description of the maintenance
     
 }

@@ -9,6 +9,22 @@ namespace CarTrack_API.DataAccess.Repositories.UserRepository;
 public class UserRepository(ApplicationDbContext context) : BaseRepository.BaseRepository(context), IUserRepository
 {
     
+    public async Task<User> GetByIdAsync(int id)
+    {
+        var user = await _context.User
+            .Include(u => u.Role)
+            .Include(u => u.ClientProfile)
+            .Include(u => u.ManagerProfile)
+            .Include(u => u.MechanicProfile)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null)
+        {
+            throw new UserNotFoundException($"User with id {id} not found");
+        }
+
+        return user;
+    }
     
     public async Task<User?> GetByEmailAsync(string email)
     {

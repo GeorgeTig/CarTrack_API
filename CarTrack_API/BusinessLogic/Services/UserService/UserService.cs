@@ -7,6 +7,7 @@ using CarTrack_API.BusinessLogic.Services.ManagerProfileService;
 using CarTrack_API.DataAccess.Repositories.RefreshTokenRepository;
 using CarTrack_API.DataAccess.Repositories.UserRepository;
 using CarTrack_API.EntityLayer.Dtos.Auth;
+using CarTrack_API.EntityLayer.Dtos.UserDto;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
@@ -120,6 +121,17 @@ public class UserService(IRefreshTokenRepository refreshTokenRepository, IUserRe
     public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken)
     {
         return await _jwtService.RefreshTokenAsync(refreshToken);
+    }
+    
+    public async Task<UserResponseDto> GetUserInfoAsync(int userId)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new UserNotFoundException($"User with id {userId} not found");
+        }
+
+        return MappingUser.ToUserResponseDto(user);
     }
     
 }

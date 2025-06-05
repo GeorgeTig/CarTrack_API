@@ -1,7 +1,9 @@
 ﻿using CarTrack_API.BusinessLogic.Mapping;
+using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
 using CarTrack_API.DataAccess.Repositories.VehicleRepository;
 using CarTrack_API.EntityLayer.Dtos.BodyDto;
+using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleEngineDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
@@ -101,6 +103,12 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMainte
         var vehicleBody = vehicle.ToBodyResponseDto();
         
         return vehicleBody;
+    }
+
+    public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto vehRequest)
+    {
+        var maintenance = MappingMaintenanceRecord.ToMaintenanceUnverifiedRecord(vehRequest);
+        await _vehicleRepository.AddVehicleMaintenanceAsync(maintenance);
     }
     
 }

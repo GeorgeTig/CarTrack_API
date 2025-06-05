@@ -1,4 +1,5 @@
-﻿using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
+﻿using CarTrack_API.EntityLayer.Dtos.UserDto;
+using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Mapping;
@@ -18,5 +19,16 @@ public static class MappingUser
 
         return user;
     }
-    
+
+    public static UserResponseDto ToUserResponseDto(this User user)
+    {
+        var userResponse = new UserResponseDto
+        {
+            Username = user.Username,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+        };
+
+        return userResponse;
+    }
 }

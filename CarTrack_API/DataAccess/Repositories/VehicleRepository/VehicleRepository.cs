@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.DataAccess.DataContext;
+using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Exceptions.VehicleException;
 using CarTrack_API.EntityLayer.Models;
 using Microsoft.EntityFrameworkCore;
@@ -133,6 +134,22 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
         }
         
         return vehicle.VehicleModel.Body;
+    }
+
+    public async Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance)
+    {
+        var vehicle = await _context.Vehicle
+            .Include(v => v.MaintenanceUnverifiedRecord)
+            .FirstOrDefaultAsync(v => v.Id == maintenance.VehicleId);
+        
+        if (vehicle == null)
+        {
+            throw new VehicleNotFoundException($"Vehicle with id {maintenance.VehicleId} not found");
+        }
+        
+        vehicle.MaintenanceUnverifiedRecord.Add(maintenance);
+        _context.Vehicle.Update(vehicle);
+        await _context.SaveChangesAsync();
     }
     
 }

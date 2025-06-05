@@ -1,5 +1,6 @@
 ﻿using CarTrack_API.BusinessLogic.Mapping;
 using CarTrack_API.DataAccess.Repositories.ReminderRepository;
+using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Models;
 
@@ -27,6 +28,12 @@ public class ReminderService(IReminderRepository reminderRepository) : IReminder
    public async Task UpdateReminderAsync(ReminderRequestDto reminderRequest)
     {
         await _reminderRepository.UpdateReminderAsync(reminderRequest);
+    }
+   
+    public async Task UpdateReminderAsync(VehicleMaintenanceRequestDto vehicleMaintenanceRequest)
+    {
+        
+        await _reminderRepository.UpdateReminderAsync(vehicleMaintenanceRequest);
     }
     
    public async Task UpdateReminderActiveAsync(int reminderId)

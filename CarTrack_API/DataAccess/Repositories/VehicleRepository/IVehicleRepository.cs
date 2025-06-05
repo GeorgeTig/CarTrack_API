@@ -1,4 +1,5 @@
-﻿using CarTrack_API.EntityLayer.Models;
+﻿using CarTrack_API.EntityLayer.Dtos.Maintenance;
+using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.DataAccess.Repositories.VehicleRepository;
 
@@ -13,4 +14,5 @@ public interface IVehicleRepository
     Task<VehicleModel> GetVehicleModelByVehicleIdAsync(int vehId);
     Task<List<VehicleUsageStats>> GetVehicleUsageStatsByVehicleIdAsync(int vehId);
     Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId);
+    Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance);
 }

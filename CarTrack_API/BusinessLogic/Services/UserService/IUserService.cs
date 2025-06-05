@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.EntityLayer.Dtos.Auth;
+using CarTrack_API.EntityLayer.Dtos.UserDto;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
 using CarTrack_API.EntityLayer.Models;
@@ -12,5 +13,5 @@ public interface IUserService
     Task RegisterAsync(UserRegisterRequestDto registerUser);
     Task<AuthResponseDto?> LoginAsync(UserLoginRequestDto loginUser);
     Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
-    
+    Task<UserResponseDto> GetUserInfoAsync(int userId);
 }
