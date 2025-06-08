@@ -15,4 +15,8 @@ public interface IVehicleRepository
     Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId);
     Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance);
     Task<List<MaintenanceUnverifiedRecord>> GetVehicleMaintenanceByVehicleIdAsync(int vehId);
+    Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDate);
+    Task AddMileageReadingAsync(MileageReading reading);
+    Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId);
+    Task UpdateVehicleInfoAsync(VehicleInfo vehicleInfo);
 }

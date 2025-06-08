@@ -7,5 +7,6 @@ public class VehicleInfo
     
     public required string Vin { get; set; }
     public double Mileage { get; set; }
+    public DateTime LastUpdate { get; set; }
     public double AverageTravelDistance { get; set; } // in km, in a day 
 }

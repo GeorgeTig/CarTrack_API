@@ -2,6 +2,7 @@
 
 public class DailyUsageDto
 {
-    public string DayLabel { get; set; } 
+    public required string DayLabel { get; set; } 
+    
     public double Distance { get; set; }
 }

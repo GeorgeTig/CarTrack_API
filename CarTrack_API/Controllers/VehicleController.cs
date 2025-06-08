@@ -3,7 +3,9 @@ using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleService;
 using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Dtos.ReminderDto;
+using CarTrack_API.EntityLayer.Dtos.Usage;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
+using CarTrack_API.EntityLayer.Exceptions.VehicleException;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -200,12 +202,52 @@ public class VehicleController(
     [HttpGet("{vehicleId}/usage/daily")]
     public async Task<IActionResult> GetDailyUsageForWeek([FromRoute] int vehicleId, [FromQuery] string timeZoneId)
     {
-        if (string.IsNullOrEmpty(timeZoneId) || TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
+        // Validează input-ul pentru a preveni erori
+        if (string.IsNullOrEmpty(timeZoneId))
         {
-            return BadRequest("A valid timeZoneId query parameter is required.");
+            return BadRequest(new { message = "A valid 'timeZoneId' query parameter is required." });
+        }
+        try
+        {
+            TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        }
+        catch (TimeZoneNotFoundException)
+        {
+            return BadRequest(new { message = $"Invalid time zone ID: {timeZoneId}" });
         }
 
-        return Ok();
-        // Aici vei apela serviciul care generează datele pentru ultimele 7 zile
+        // TODO: Verifică dacă utilizatorul curent are acces la acest vehicleId
+
+        // Apelează serviciul care face logica de calcul
+        var dailyUsage = await _vehicleService.GetDailyUsageForLastWeekAsync(vehicleId, timeZoneId);
+        
+        return Ok(dailyUsage);
+    }
+    
+    [HttpPost("{vehicleId}/mileage-readings")]
+    public async Task<IActionResult> AddMileageReading(
+        [FromRoute] int vehicleId, 
+        [FromBody] AddMileageReadingRequestDto request)
+    {
+        // TODO: Adaugă verificarea proprietarului vehiculului
+    
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            await _vehicleService.AddMileageReadingAsync(vehicleId, request);
+            return Ok(new { message = "Mileage updated successfully." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (VehicleNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
     }
 }

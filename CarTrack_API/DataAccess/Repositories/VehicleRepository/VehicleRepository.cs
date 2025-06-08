@@ -152,4 +152,33 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
         return vehicle.MaintenanceUnverifiedRecord;
     }
     
+    public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDate)
+    {
+        return await _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId && r.ReadingDate >= startDate)
+            .OrderBy(r => r.ReadingDate)
+            .ToListAsync();
+    }
+    
+    public async Task AddMileageReadingAsync(MileageReading reading)
+    {
+        await _context.MileageReading
+            .AddAsync(reading);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId)
+    {
+        return await _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId)
+            .OrderByDescending(r => r.ReadingDate)
+            .FirstOrDefaultAsync();
+    }
+    
+    public async Task UpdateVehicleInfoAsync(VehicleInfo vehicleInfo)
+    {
+        _context.VehicleInfo.Update(vehicleInfo);
+        await _context.SaveChangesAsync();
+    }
+    
 }

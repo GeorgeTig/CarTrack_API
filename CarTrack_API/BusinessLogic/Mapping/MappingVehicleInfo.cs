@@ -1,17 +1,19 @@
-﻿using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
-using CarTrack_API.EntityLayer.Models;
+﻿    using CarTrack_API.EntityLayer.Dtos.VehicleInfo;
+    using CarTrack_API.EntityLayer.Models;
 
-namespace CarTrack_API.BusinessLogic.Mapping;
+    namespace CarTrack_API.BusinessLogic.Mapping;
 
-public static class MappingVehicleInfo
-{
-    public static VehicleInfoResponseDto ToVehicleInfoResponseDto(this VehicleInfo vehicleInfo)
+    public static class MappingVehicleInfo
     {
-        var vehicleInfoResponseDto = new VehicleInfoResponseDto
+        public static VehicleInfoResponseDto ToVehicleInfoResponseDto(this VehicleInfo vehicleInfo)
         {
-            Mileage = vehicleInfo.Mileage,
-        };
+            var vehicleInfoResponseDto = new VehicleInfoResponseDto
+            {
+                Mileage = vehicleInfo.Mileage,
+                AverageTravelDistance = vehicleInfo.AverageTravelDistance,
+                LastUpdate = vehicleInfo.LastUpdate.ToString("o") 
+            };
 
-        return vehicleInfoResponseDto;
+            return vehicleInfoResponseDto;
+        }
     }
-}
