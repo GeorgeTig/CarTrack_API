@@ -20,10 +20,33 @@ public static class MappingMaintenanceRecord
             Cost = vehMaintenance.Cost,
             Description = vehMaintenance.Notes,
             DoneMileage = vehMaintenance.Mileage,
-            MaintenanceNames = vehMaintenance.MaintenanceItems.Select(item => item.Name).ToList()
+            MaintenanceNames = vehMaintenance.MaintenanceItems.Select(item => item.Name).ToList(),
+            ServiceProvider = vehMaintenance.ServiceProvider,
             
         };
         
         return maintenance;
+    }
+
+    public static List<MaintenanceLogDto> ToMaintenanceLogDtoList(
+        this List<MaintenanceUnverifiedRecord> maintenanceRecords)
+    {
+        var maintenanceLogDtos = new List<MaintenanceLogDto>();
+        foreach (var record in maintenanceRecords)
+        {
+            var maintenanceLogDto = new MaintenanceLogDto
+            {
+                Id = record.Id,
+                Date = record.DoneDate,
+                Cost = (double)record.Cost,
+                Mileage = record.DoneMileage,
+                PerformedTasks = record.MaintenanceNames,
+                ServiceProvider = record.ServiceProvider,
+                Notes = record.Description
+            };
+            maintenanceLogDtos.Add(maintenanceLogDto);
+        }
+
+        return maintenanceLogDtos;
     }
 }

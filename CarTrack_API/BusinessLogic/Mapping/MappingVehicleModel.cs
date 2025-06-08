@@ -6,16 +6,16 @@ namespace CarTrack_API.BusinessLogic.Mapping;
 
 public static class MappingVehicleModel
 {
-   public static List<VinDecodedResponnseDto> ToVinDecodedResponnseDto(List<VehicleModel> vehicleModels)
+   public static List<VinDecodedResponseDto> ToVinDecodedResponnseDto(List<VehicleModel> vehicleModels)
    {
       var groupedBySeries = vehicleModels
          .GroupBy(vm => new { vm.SeriesName, Producer = vm.Producer.Name });
 
-      var vinDecodedDtos = new List<VinDecodedResponnseDto>();
+      var vinDecodedDtos = new List<VinDecodedResponseDto>();
 
       foreach (var group in groupedBySeries)
       {
-         var vinDto = new VinDecodedResponnseDto
+         var vinDto = new VinDecodedResponseDto
          {
             SeriesName = group.Key.SeriesName,
             Producer = group.Key.Producer,

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using CarTrack_API.DataAccess.DataContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarTrack_API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250608114310_mig28")]
+    partial class mig28
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,34 +264,6 @@ namespace CarTrack_API.Migrations
                     b.HasIndex("RepairShopId");
 
                     b.ToTable("MechanicProfile");
-                });
-
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.MileageReading", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("OdometerValue")
-                        .HasColumnType("double precision");
-
-                    b.Property<DateTime>("ReadingDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VehicleId");
-
-                    b.ToTable("MileageReading");
                 });
 
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Notification", b =>
@@ -847,17 +822,6 @@ namespace CarTrack_API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CarTrack_API.EntityLayer.Models.MileageReading", b =>
-                {
-                    b.HasOne("CarTrack_API.EntityLayer.Models.Vehicle", "Vehicle")
-                        .WithMany("MileageReadings")
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Vehicle");
-                });
-
             modelBuilder.Entity("CarTrack_API.EntityLayer.Models.Notification", b =>
                 {
                     b.HasOne("CarTrack_API.EntityLayer.Models.Reminder", "Reminder")
@@ -1113,8 +1077,6 @@ namespace CarTrack_API.Migrations
                     b.Navigation("MaintenanceUnverifiedRecord");
 
                     b.Navigation("MaintenanceVerifiedRecord");
-
-                    b.Navigation("MileageReadings");
 
                     b.Navigation("Notifications");
 

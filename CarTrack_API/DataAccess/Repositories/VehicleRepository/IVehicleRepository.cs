@@ -12,7 +12,7 @@ public interface IVehicleRepository
     Task<VehicleEngine> GetVehicleEngineByVehicleIdAsync(int vehId);
     Task<VehicleInfo> GetVehicleInfoByVehicleIdAsync(int vehId);
     Task<VehicleModel> GetVehicleModelByVehicleIdAsync(int vehId);
-    Task<List<VehicleUsageStats>> GetVehicleUsageStatsByVehicleIdAsync(int vehId);
     Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId);
     Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance);
+    Task<List<MaintenanceUnverifiedRecord>> GetVehicleMaintenanceByVehicleIdAsync(int vehId);
 }

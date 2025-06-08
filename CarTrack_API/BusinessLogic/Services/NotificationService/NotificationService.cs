@@ -13,4 +13,10 @@ public class NotificationService(INotificationRepository notificationRepository)
         var notifications= await _notificationRepository.GetAllNotificationsAsync(userId);
         return MappingNotification.ToNotificationResponseDtoList(notifications);
     }
+   public async Task MarkNotificationsAsReadAsync(List<int> notificationIds)
+    {
+        await _notificationRepository.MarkNotificationAsReadAsync(notificationIds);
+    }
+
+   
 }

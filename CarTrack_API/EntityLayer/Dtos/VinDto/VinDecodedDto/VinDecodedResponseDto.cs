@@ -1,6 +1,6 @@
 ﻿namespace CarTrack_API.EntityLayer.Dtos.VinDto.VinDecodedDto;
 
-public class VinDecodedResponnseDto
+public class VinDecodedResponseDto
 {
     public string SeriesName { get; set; }
     public string Producer { get; set; }

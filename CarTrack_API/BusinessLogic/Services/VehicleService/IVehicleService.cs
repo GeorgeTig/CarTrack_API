@@ -15,7 +15,7 @@ public interface IVehicleService
     Task <VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehId);
     Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehId);
     Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehId);
-    Task<List<VehicleUsageStatsResponseDto>> GetVehicleUsageStatsByVehicleIdAsync(int vehId);
     Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehId);
     Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request);
+    Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId);
 }

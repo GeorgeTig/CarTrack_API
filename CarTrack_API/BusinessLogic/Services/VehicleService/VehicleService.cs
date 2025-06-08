@@ -79,19 +79,6 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMainte
         return vehicleInfoResponseDto ;
     }
     
-    public async Task<List<VehicleUsageStatsResponseDto>> GetVehicleUsageStatsByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _vehicleRepository.GetVehicleUsageStatsByVehicleIdAsync(vehId);
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException("VehicleUsageStats not found");
-        }
-        
-        var vehicleUsageStatsResponseDto = vehicle.ToListVehicleUsageResponseDto();
-        
-        return vehicleUsageStatsResponseDto ;
-    }
-    
     public async Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehId)
     {
         var vehicle = await _vehicleRepository.GetVehicleBodyByVehicleIdAsync(vehId);
@@ -111,4 +98,16 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMainte
         await _vehicleRepository.AddVehicleMaintenanceAsync(maintenance);
     }
     
+    public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehId)
+    {
+        var maintenanceLog = await _vehicleRepository.GetVehicleMaintenanceByVehicleIdAsync(vehId);
+        if (maintenanceLog == null)
+        {
+            throw new VehicleNotFoundException("Vehicle maintenance log not found");
+        }
+
+        var maintenanceLogDto = maintenanceLog.ToMaintenanceLogDtoList();
+        
+        return maintenanceLogDto;
+    }
 }

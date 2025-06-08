@@ -11,10 +11,30 @@ public class NotificationRepository(ApplicationDbContext context) : BaseReposito
         var notifications = await _context.Notification
             .Include(n => n.User)
             .Include(n => n.Vehicle)
+            .Include(n=> n.Vehicle.VehicleModel)
+            .Include(n => n.Vehicle.VehicleModel.Producer)
+            .Include(n => n.Vehicle.VehicleInfo)
             .Include(n => n.Reminder)
             .Where(n => n.User.Id == userId)
             .ToListAsync();
 
         return notifications;
+    }
+    
+    public async Task MarkNotificationAsReadAsync(List<int> notificationIds)
+    {
+        foreach (var id in notificationIds)
+        {
+            var notification = await _context.Notification
+                .FirstOrDefaultAsync(n => n.Id == id);
+            
+            if (notification != null)
+            {
+                notification.IsRead = true;
+                _context.Notification.Update(notification);
+            }
+           
+        }
+        await _context.SaveChangesAsync();
     }
 }

@@ -88,7 +88,7 @@ public class UserService(IRefreshTokenRepository refreshTokenRepository, IUserRe
             var user = registerUser.ToUser();
             await _userRepository.AddUserAsync(user);
 
-            if (user.Id == 1)
+            if (user.RoleId == 1)
             {
                 var clientProfile = new ClientProfile
                 {
@@ -97,7 +97,7 @@ public class UserService(IRefreshTokenRepository refreshTokenRepository, IUserRe
 
                 await _clientProfileService.AddClientProfileAsync(clientProfile);
             }
-            else if (user.Id == 2)
+            else if (user.RoleId == 2)
             {
                 var managerProfile = new ManagerProfile
                 {
@@ -132,6 +132,54 @@ public class UserService(IRefreshTokenRepository refreshTokenRepository, IUserRe
         }
 
         return MappingUser.ToUserResponseDto(user);
+    }
+    
+    public async Task UpdateProfileAsync(int userId, UpdateProfileRequestDto request)
+    {
+
+        var user = await _userRepository.GetByIdAsync(userId);
+        
+        if (user == null)
+        {
+            throw new UserNotFoundException($"User with id {userId} not found");
+        }
+        
+        if (string.IsNullOrWhiteSpace(request.Username) && string.IsNullOrWhiteSpace(request.PhoneNumber))
+        {
+            throw new ArgumentException("Update request cannot be empty.");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(request.Username))
+        {
+            user.Username = request.Username ;
+        }
+        if (request.PhoneNumber != null && request.PhoneNumber.Length == 10)
+        {
+            user.PhoneNumber = int.Parse(request.PhoneNumber);
+        }
+
+        await _userRepository.UpdateUserAsync(user);
+    }
+    
+    public async Task ChangePasswordAsync(int userId, ChangePasswordRequestDto request)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new UserNotFoundException($"User with id {userId} not found");
+        }
+
+        if (!await ValidatePassword(request.CurrentPassword, user.Password))
+        {
+            throw new ArgumentException("Incorrect current password.");
+        }
+
+        using var sha256 = SHA256.Create();
+        var hashedNewPassword = Convert.ToBase64String(sha256.ComputeHash(Encoding.UTF8.GetBytes(request.NewPassword)));
+        
+        user.Password = hashedNewPassword;
+        
+        await _userRepository.UpdateUserAsync(user);
     }
     
 }

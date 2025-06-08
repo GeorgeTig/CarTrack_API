@@ -12,7 +12,7 @@ public class VinDecoderService(HttpClient httpClient, IVehicleModelService vehic
     private readonly HttpClient _httpClient = httpClient;
     private readonly IVehicleModelService _vehicleModelService = vehicleModelService;
 
-    public async Task<List<VinDecodedResponnseDto>> DecodeVinAsync(string vin)
+    public async Task<List<VinDecodedResponseDto>> DecodeVinAsync(string vin)
     {
         
         

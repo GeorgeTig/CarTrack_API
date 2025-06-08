@@ -15,7 +15,10 @@ public static class MappingNotification
             IsRead = notification.IsRead,
             UserId = notification.UserId,
             VehicleId = notification.VehicleId,
-            ReminderId = notification.RemiderId
+            ReminderId = notification.RemiderId,
+            
+            VehicleName =notification.Vehicle.VehicleModel.Producer.Name + " " + notification.Vehicle.VehicleModel.SeriesName,
+            VehicleYear = notification.Vehicle.VehicleModel.Year
         };
     }
     

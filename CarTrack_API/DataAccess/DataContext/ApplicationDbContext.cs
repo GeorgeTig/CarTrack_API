@@ -22,9 +22,10 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<VehicleModel> VehicleModel { get; set; }
     public DbSet<VehiclePaper> VehiclePaper { get; set; }
     public DbSet<VehicleInfo> VehicleInfo { get; set; }
-    public DbSet<VehicleUsageStats> VehicleUsageStats { get; set; }
     public DbSet<VehicleMaintenanceConfig> VehicleMaintenanceConfig { get; set; }
     public DbSet<MaintenanceType> MaintenanceType { get; set; }
+    public DbSet<MileageReading> MileageReading { get; set; }
+    
     public DbSet<Reminder> Reminder { get; set; }
     public DbSet<Status> Status { get; set; }
     
@@ -34,6 +35,11 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<MileageReading>()
+            .HasOne(mr => mr.Vehicle)
+            .WithMany(v => v.MileageReadings)
+            .HasForeignKey(mr => mr.VehicleId);
+        
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.User)
             .WithMany(u => u.Notifications)
@@ -110,11 +116,6 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
             .HasOne(vi => vi.Vehicle)
             .WithOne(v => v.VehicleInfo)
             .HasForeignKey<VehicleInfo>(vi => vi.VehicleId);
-        
-        modelBuilder.Entity<VehicleUsageStats>()
-            .HasOne(vu => vu.Vehicle)
-            .WithMany(v => v.VehicleUsageStats)
-            .HasForeignKey(vu => vu.VehicleId);
         
         modelBuilder.Entity<VehicleModel>()
             .HasOne(vm => vm.VehicleEngine)

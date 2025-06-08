@@ -11,8 +11,8 @@ public class Vehicle
     public List<VehiclePaper> VehiclePapers = new();
     public List<MaintenanceVerifiedRecord> MaintenanceVerifiedRecord;
     public List<MaintenanceUnverifiedRecord> MaintenanceUnverifiedRecord;
+    public List<MileageReading> MileageReadings { get; set; } = new();
     public VehicleInfo VehicleInfo { get; set; }
-    public List<VehicleUsageStats> VehicleUsageStats { get; set; }
     public List<VehicleMaintenanceConfig> VehicleMaintenanceConfigs { get; set; }
     public List<Notification> Notifications { get; set; }
     public List<Reminder> Reminders { get; set; }

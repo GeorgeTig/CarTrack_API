@@ -12,6 +12,7 @@ public class MaintenanceUnverifiedRecord
     
     // An unverified maintenance can be inputed by an user 
     public List<string> MaintenanceNames { get; set; } = new();
-    public string Description { get; set; } // Optional description of the maintenance
+    public string Description { get; set; }
+    public string ServiceProvider { get; set; }
     
 }

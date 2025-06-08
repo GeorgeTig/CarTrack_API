@@ -45,4 +45,11 @@ public class ReminderService(IReminderRepository reminderRepository) : IReminder
     {
         await _reminderRepository.ActualizeRemindersDueAsync();
     }
+    
+    public async Task<ReminderResponseDto> GetReminderByReminderIdAsync(int reminderId)
+    {
+        var reminder = await _reminderRepository.GetReminderByReminderIdAsync(reminderId);
+        var reminderResponseDto = reminder.ToReminderResponseDto();
+        return reminderResponseDto;
+    }
 }

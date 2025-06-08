@@ -40,10 +40,31 @@ public static class MappingReminder
                 IsEditable = reminder.VehicleMaintenanceConfig.IsEditable,
                 DueMileage = reminder.DueMileage,
                 DueDate = DateTime.UtcNow.AddDays(reminder.DueDate),
-                IsActive = reminder.IsActive,
+                IsActive = reminder.IsActive
             };
             reminderResponseDtos.Add(reminderResponseDto);
         }
         return reminderResponseDtos;
+    }
+    
+    public static ReminderResponseDto ToReminderResponseDto(this Reminder reminder)
+    {
+        return new ReminderResponseDto
+        {
+            ConfigId = reminder.VehicleMaintenanceConfigId,
+            StatusId = reminder.StatusId,
+            TypeId = reminder.VehicleMaintenanceConfig.MaintenanceTypeId,
+            Name = reminder.VehicleMaintenanceConfig.Name,
+            TypeName = reminder.VehicleMaintenanceConfig.MaintenanceType.Name,
+            MileageInterval = reminder.VehicleMaintenanceConfig.MileageIntervalConfig,
+            TimeInterval = reminder.VehicleMaintenanceConfig.DateIntervalConfig,
+            LastMileageCheck = reminder.LastMileageCkeck,
+            LastDateCheck = reminder.LastDateCheck,
+            IsEditable = reminder.VehicleMaintenanceConfig.IsEditable,
+            DueMileage = reminder.DueMileage,
+            DueDate = DateTime.UtcNow.AddDays(reminder.DueDate),
+            IsActive = reminder.IsActive,
+            
+        };
     }
 }

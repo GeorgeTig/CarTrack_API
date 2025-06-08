@@ -12,4 +12,5 @@ public interface IReminderService
     Task UpdateReminderAsync(VehicleMaintenanceRequestDto vehicleMaintenanceRequest);
     Task UpdateReminderActiveAsync(int reminderId);
     Task ActualizeRemindersDueAsync();
+    public Task<ReminderResponseDto> GetReminderByReminderIdAsync(int reminderId);
 }

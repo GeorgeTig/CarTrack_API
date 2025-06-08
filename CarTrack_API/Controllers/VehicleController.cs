@@ -81,18 +81,6 @@ public class VehicleController(
         return Ok(vehicleInfo);
     }
 
-    [HttpGet("usage/{vehId}")]
-    public async Task<IActionResult> GetVehicleUsageStatsByVehicleId([FromRoute] int vehId)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var vehicleUsageStats = await _vehicleService.GetVehicleUsageStatsByVehicleIdAsync(vehId);
-        return Ok(vehicleUsageStats);
-    }
-
     [HttpGet("body/{vehId}")]
     public async Task<IActionResult> GetVehicleBodyByVehicleId([FromRoute] int vehId)
     {
@@ -116,6 +104,18 @@ public class VehicleController(
         var reminders = await _reminderService.GetAllRemindersByVehicleIdAsync(vehId);
         return Ok(reminders);
     }
+    
+    [HttpGet("reminders/get/{reminderId}")]
+    public async Task<IActionResult> GetReminderByReminderId([FromRoute] int reminderId)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var reminder = await _reminderService.GetReminderByReminderIdAsync(reminderId);
+        return Ok(reminder);
+    }
 
     [HttpPost("update/reminder")]
     public async Task<IActionResult> UpdateReminder([FromBody] ReminderRequestDto request)
@@ -130,7 +130,7 @@ public class VehicleController(
         return Ok();
     }
 
-    [HttpPost("update/reminder{reminderId}/default")]
+    [HttpPost("update/reminder/{reminderId}/default")]
     public async Task<IActionResult> UpdateReminderDefault([FromRoute] int reminderId)
     {
         if (!ModelState.IsValid)
@@ -142,7 +142,7 @@ public class VehicleController(
         return Ok();
     }
 
-    [HttpPost("update/reminder{reminderId}/active")]
+    [HttpPost("update/reminder/{reminderId}/active")] 
     public async Task<IActionResult> UpdateReminderActive([FromRoute] int reminderId)
     {
         if (!ModelState.IsValid)
@@ -185,5 +185,27 @@ public class VehicleController(
         await _vehicleService.AddVehicleMaintenanceAsync(request);
 
         return Ok(new { message = "Maintenance log added successfully." });
+    }
+    
+    [HttpGet("{vehicleId}/history/maintenance")]
+    public async Task<IActionResult> GetMaintenanceHistory([FromRoute] int vehicleId)
+    {
+        // Verifică dacă utilizatorul are dreptul să vadă acest vehicul (foarte important!)
+        // ... logica de verificare a proprietarului ...
+
+        var history = await _vehicleService.GetMaintenanceHistoryAsync(vehicleId);
+        return Ok(history);
+    }
+    
+    [HttpGet("{vehicleId}/usage/daily")]
+    public async Task<IActionResult> GetDailyUsageForWeek([FromRoute] int vehicleId, [FromQuery] string timeZoneId)
+    {
+        if (string.IsNullOrEmpty(timeZoneId) || TimeZoneInfo.FindSystemTimeZoneById(timeZoneId) == null)
+        {
+            return BadRequest("A valid timeZoneId query parameter is required.");
+        }
+
+        return Ok();
+        // Aici vei apela serviciul care generează datele pentru ultimele 7 zile
     }
 }

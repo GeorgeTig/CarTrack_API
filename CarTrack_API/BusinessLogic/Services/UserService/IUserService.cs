@@ -14,4 +14,6 @@ public interface IUserService
     Task<AuthResponseDto?> LoginAsync(UserLoginRequestDto loginUser);
     Task<AuthResponseDto> RefreshTokenAsync(string refreshToken);
     Task<UserResponseDto> GetUserInfoAsync(int userId);
+    Task UpdateProfileAsync(int userId,UpdateProfileRequestDto userRequest);
+    Task ChangePasswordAsync(int userId, ChangePasswordRequestDto changePasswordRequest);
 }

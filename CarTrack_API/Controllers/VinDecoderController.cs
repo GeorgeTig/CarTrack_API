@@ -13,7 +13,7 @@ public class VinDecoderController(IVinDecoderService vinDecoderService): Control
     [HttpGet ("{vin}/{clientId}")]
     public async Task<IActionResult> DecodeVin([FromRoute] string vin, [FromRoute] int clientId)
     {
-        if (string.IsNullOrWhiteSpace(vin) || vin.Length != 17)  // VIN should be 17 characters
+        if (string.IsNullOrWhiteSpace(vin) || vin.Length != 17) 
         {
             return BadRequest("Invalid VIN format.");
         }

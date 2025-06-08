@@ -173,4 +173,20 @@ public class ReminderRepository(ApplicationDbContext context)
 
         await _context.SaveChangesAsync();
     }
+    
+    public async Task<Reminder> GetReminderByReminderIdAsync(int reminderId)
+    {
+        var reminder = await _context.Reminder
+            .Include(r => r.VehicleMaintenanceConfig)
+            .Include(r => r.Status)
+            .Include(r=> r.VehicleMaintenanceConfig.MaintenanceType)
+            .FirstOrDefaultAsync(r => r.VehicleMaintenanceConfig.Id == reminderId);
+
+        if (reminder == null)
+        {
+            throw new KeyNotFoundException($"Reminder with ID {reminderId} not found.");
+        }
+
+        return reminder;
+    }
 }

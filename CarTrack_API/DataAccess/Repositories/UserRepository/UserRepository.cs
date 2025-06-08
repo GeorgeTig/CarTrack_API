@@ -58,4 +58,11 @@ public class UserRepository(ApplicationDbContext context) : BaseRepository.BaseR
         _context.User.Add(user);
         await _context.SaveChangesAsync();
     }
+    
+    public async Task UpdateUserAsync(User user)
+    {
+       
+        _context.User.Update(user);
+        await _context.SaveChangesAsync();
+    }
 }
