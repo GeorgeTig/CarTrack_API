@@ -3,20 +3,28 @@ using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.DataAccess.Repositories.VehicleRepository;
 
+
 public interface IVehicleRepository
 {
-    Task<List<Vehicle>> GetAllByClientIdAsync(int clientId);
+    // --- Metode pentru entitatea Vehicle ---
+    Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId);
+    Task<Vehicle?> GetVehicleForValidationAsync(string vin);
     Task AddVehicleAsync(Vehicle vehicle);
-    Task<Vehicle?> GetByIdAsync(int id);
-    Task<Vehicle?> GetByVinAsync(string vin);
-    Task<VehicleEngine> GetVehicleEngineByVehicleIdAsync(int vehId);
-    Task<VehicleInfo> GetVehicleInfoByVehicleIdAsync(int vehId);
-    Task<VehicleModel> GetVehicleModelByVehicleIdAsync(int vehId);
-    Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId);
+
+    // --- Metode pentru obținerea de sub-entități specifice ---
+    Task<VehicleEngine?> GetEngineByVehicleIdAsync(int vehicleId);
+    Task<VehicleInfo?> GetInfoByVehicleIdAsync(int vehicleId);
+    Task<VehicleModel?> GetModelByVehicleIdAsync(int vehicleId);
+    Task<Body?> GetBodyByVehicleIdAsync(int vehicleId);
+    Task<List<MaintenanceUnverifiedRecord>> GetMaintenanceHistoryByVehicleIdAsync(int vehicleId);
+
+    // --- Metode pentru scriere/actualizare ---
     Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance);
-    Task<List<MaintenanceUnverifiedRecord>> GetVehicleMaintenanceByVehicleIdAsync(int vehId);
-    Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDate);
     Task AddMileageReadingAsync(MileageReading reading);
     Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId);
+    Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDateUtc);
     Task UpdateVehicleInfoAsync(VehicleInfo vehicleInfo);
+    
+    // O metodă generică de salvare, utilă pentru BaseRepository
+    Task SaveChangesAsync();
 }

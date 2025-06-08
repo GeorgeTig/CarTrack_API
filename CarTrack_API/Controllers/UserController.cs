@@ -8,44 +8,41 @@ namespace CarTrack_API.Controllers;
 
 [Authorize(Roles = "client")]
 [Route("api/user")]
-public class AccountController(IUserService userService /*, IEmailService emailService */) : ControllerBase
+public class UserController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
-    // --- Endpoint pentru a lua informațiile utilizatorului curent (mai sigur decât cu ID în rută) ---
     [HttpGet("profile")]
     public async Task<IActionResult> GetUserProfile()
     {
+        // Extragem ID-ul utilizatorului din token, nu din rută.
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
         var user = await _userService.GetUserInfoAsync(userId);
-
         return Ok(user);
     }
-
-    // --- Endpoint pentru actualizarea profilului (username, telefon) ---
+    
     [HttpPut("update-profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequestDto request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
         await _userService.UpdateProfileAsync(userId, request);
-        return Ok();
+        return Ok(new { message = "Profile updated successfully." });
     }
-
-    // --- Endpoint pentru schimbarea parolei ---
+    
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        
-        await _userService.ChangePasswordAsync(userId, request);
-        return Ok(new { message = "Password changed successfully." });
+        try
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _userService.ChangePasswordAsync(userId, request);
+            return Ok(new { message = "Password changed successfully." });
+        }
+        catch (ArgumentException ex) // Prinde eroarea pentru parola curentă greșită
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
-
-    
 }

@@ -15,142 +15,41 @@ using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.VehicleService;
 
-public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMaintenanceConfigService vehicleConfigService)
-    : IVehicleService
+public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMaintenanceConfigService vehicleConfigService) : IVehicleService
 {
     private readonly IVehicleRepository _vehicleRepository = vehicleRepository;
     private readonly IVehicleMaintenanceConfigService _vehicleConfigService = vehicleConfigService;
-
+    
     public async Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int id)
     {
-        var vehicles = await _vehicleRepository.GetAllByClientIdAsync(id);
-        var vehicleResponseDtos = vehicles.ToListVehicleResponseDto();
-        return vehicleResponseDtos;
+        var vehicles = await _vehicleRepository.GetVehiclesForListViewAsync(id);
+        return vehicles.ToListVehicleResponseDto();
     }
 
     public async Task AddVehicleAsync(VehicleRequestDto vehicleRequestDto)
     {
-        try
-        {
-            var vehicle = vehicleRequestDto.ToVehicle();
-            await _vehicleRepository.AddVehicleAsync(vehicle);
-            await _vehicleConfigService.DefaultMaintenanceConfigAsync(vehicle.Id);
-        }
-        catch (VehicleAlreadyExistException)
-        {
-            throw;
-        }
+        var vehicle = vehicleRequestDto.ToVehicle();
+        await _vehicleRepository.AddVehicleAsync(vehicle);
+        // vehicle.Id va fi populat de EF Core după salvare
+        await _vehicleConfigService.DefaultMaintenanceConfigAsync(vehicle.Id);
     }
-
-    public async Task<VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _vehicleRepository.GetVehicleEngineByVehicleIdAsync(vehId);
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException("VehicleEngine not found");
-        }
-
-        var vehicleEngineResponseDto = vehicle.ToVehicleEngineResponseDto();
-
-        return vehicleEngineResponseDto;
-    }
-
-    public async Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _vehicleRepository.GetVehicleModelByVehicleIdAsync(vehId);
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException("VehicleModel not found");
-        }
-
-        var vehicleModelResponseDto = vehicle.ToVehicleModelResponseDto();
-
-        return vehicleModelResponseDto;
-    }
-
-    public async Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _vehicleRepository.GetVehicleInfoByVehicleIdAsync(vehId);
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException("VehicleInfo not found");
-        }
-
-        var vehicleInfoResponseDto = vehicle.ToVehicleInfoResponseDto();
-
-        return vehicleInfoResponseDto;
-    }
-
-    public async Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _vehicleRepository.GetVehicleBodyByVehicleIdAsync(vehId);
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException("Vehicle not found");
-        }
-
-        var vehicleBody = vehicle.ToBodyResponseDto();
-
-        return vehicleBody;
-    }
-
-    public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto vehRequest)
-    {
-        var maintenance = MappingMaintenanceRecord.ToMaintenanceUnverifiedRecord(vehRequest);
-        await _vehicleRepository.AddVehicleMaintenanceAsync(maintenance);
-    }
-
-    public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehId)
-    {
-        var maintenanceLog = await _vehicleRepository.GetVehicleMaintenanceByVehicleIdAsync(vehId);
-        if (maintenanceLog == null)
-        {
-            throw new VehicleNotFoundException("Vehicle maintenance log not found");
-        }
-
-        var maintenanceLogDto = maintenanceLog.ToMaintenanceLogDtoList();
-
-        return maintenanceLogDto;
-    }
-
-    public async Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId)
-    {
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-        var todayInZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
-        var firstDayOfInterval = todayInZone.AddDays(-6);
-
-        // --- AICI ESTE CORECȚIA CRUCIALĂ PENTRU EROAREA DE DATETIME ---
-        // Convertim data locală înapoi la UTC înainte de a o trimite la baza de date.
-        // Presupunem că datele din DB sunt stocate în UTC.
-        var startDateUtc = TimeZoneInfo.ConvertTimeToUtc(firstDayOfInterval, timeZone);
-
-        var readings = await _vehicleRepository.GetMileageReadingsForDateRangeAsync(vehicleId, startDateUtc);
-
-        if (!readings.Any())
-        {
-            return Enumerable.Range(0, 7)
-                .Select(i => new DailyUsageDto { DayLabel = firstDayOfInterval.AddDays(i).ToString("ddd"), Distance = 0 })
-                .ToList();
-        }
     
-        var results = new List<DailyUsageDto>();
-        for (int i = 0; i < 7; i++)
-        {
-            var currentDate = firstDayOfInterval.AddDays(i);
-            var lastReadingOfCurrentDay = readings.LastOrDefault(r => TimeZoneInfo.ConvertTimeFromUtc(r.ReadingDate, timeZone).Date == currentDate);
-            var lastReadingOfPreviousDay = readings.LastOrDefault(r => TimeZoneInfo.ConvertTimeFromUtc(r.ReadingDate, timeZone).Date < currentDate);
+    public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request)
+    {
+        var maintenanceRecord = request.ToMaintenanceUnverifiedRecord();
+        await _vehicleRepository.AddVehicleMaintenanceAsync(maintenanceRecord);
         
-            double dailyDistance = 0;
-            if (lastReadingOfCurrentDay != null)
-            {
-                double startMileage = lastReadingOfPreviousDay?.OdometerValue ?? lastReadingOfCurrentDay.OdometerValue;
-                dailyDistance = lastReadingOfCurrentDay.OdometerValue - startMileage;
-            }
-            results.Add(new DailyUsageDto { DayLabel = currentDate.ToString("ddd"), Distance = Math.Max(0, dailyDistance) });
-        }
-        return results;
+        // Când se adaugă o mentenanță, creăm și o citire de kilometraj
+        var mileageReading = new MileageReading
+        {
+            VehicleId = request.VehicleId,
+            OdometerValue = request.Mileage,
+            ReadingDate = request.Date.ToUniversalTime(),
+            Source = "MaintenanceLog"
+        };
+        await AddMileageReadingAsync(request.VehicleId, new AddMileageReadingRequestDto { OdometerValue = request.Mileage });
     }
-
+    
     public async Task AddMileageReadingAsync(int vehicleId, AddMileageReadingRequestDto request)
     {
         var lastReading = await _vehicleRepository.GetLastMileageReadingAsync(vehicleId);
@@ -166,24 +65,91 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMainte
             ReadingDate = DateTime.UtcNow,
             Source = "QuickSync"
         };
-    
-        // Pasul 1: Salvează noua citire a kilometrajului
+        
         await _vehicleRepository.AddMileageReadingAsync(newReading);
-    
-        // Pasul 2: Actualizează kilometrajul principal și data de update din VehicleInfo
-        var vehicleInfo = await _vehicleRepository.GetVehicleInfoByVehicleIdAsync(vehicleId);
+        
+        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
         if (vehicleInfo != null)
         {
             vehicleInfo.Mileage = request.OdometerValue;
             vehicleInfo.LastUpdate = newReading.ReadingDate;
-        
-            // --- APEL CORECT CĂTRE REPOSITORY ---
             await _vehicleRepository.UpdateVehicleInfoAsync(vehicleInfo);
         }
-        else
+    }
+
+    public async Task<VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehicleId)
+    {
+        var vehicleEngine = await _vehicleRepository.GetEngineByVehicleIdAsync(vehicleId);
+        if (vehicleEngine == null) throw new VehicleNotFoundException("Vehicle Engine not found");
+        return vehicleEngine.ToVehicleEngineResponseDto();
+    }
+    
+    public async Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehicleId)
+    {
+        var vehicleModel = await _vehicleRepository.GetModelByVehicleIdAsync(vehicleId);
+        if (vehicleModel == null) throw new VehicleNotFoundException("Vehicle Model not found");
+        return vehicleModel.ToVehicleModelResponseDto();
+    }
+    
+    public async Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehicleId)
+    {
+        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
+        if (vehicleInfo == null) throw new VehicleNotFoundException("Vehicle Info not found");
+        return vehicleInfo.ToVehicleInfoResponseDto();
+    }
+    
+    public async Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId)
+    {
+        var body = await _vehicleRepository.GetBodyByVehicleIdAsync(vehicleId);
+        if (body == null) throw new VehicleNotFoundException("Vehicle Body not found");
+        return body.ToBodyResponseDto();
+    }
+    
+    public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId)
+    {
+        var maintenanceLogs = await _vehicleRepository.GetMaintenanceHistoryByVehicleIdAsync(vehicleId);
+        return maintenanceLogs.ToMaintenanceLogDtoList();
+    }
+    
+    public async Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId)
+    {
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+        var todayInZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
+        var firstDayOfInterval = todayInZone.AddDays(-6);
+        var startDateUtc = TimeZoneInfo.ConvertTimeToUtc(firstDayOfInterval.AddDays(-1), timeZone);
+
+        var readings = await _vehicleRepository.GetMileageReadingsForDateRangeAsync(vehicleId, startDateUtc);
+
+        if (!readings.Any())
         {
-            // Acest caz nu ar trebui să se întâmple dacă vehiculul există, dar e bine să-l avem
-            throw new VehicleNotFoundException($"VehicleInfo for VehicleId {vehicleId} not found.");
+            return Enumerable.Range(0, 7)
+                .Select(i => new DailyUsageDto { DayLabel = firstDayOfInterval.AddDays(i).ToString("ddd", new System.Globalization.CultureInfo("en-US")), Distance = 0 })
+                .ToList();
         }
+
+        var results = new List<DailyUsageDto>();
+        double lastKnownMileage = readings.First().OdometerValue;
+
+        for (int i = 0; i < 7; i++)
+        {
+            var currentDate = firstDayOfInterval.AddDays(i);
+            var readingsOfCurrentDay = readings
+                .Where(r => TimeZoneInfo.ConvertTimeFromUtc(r.ReadingDate, timeZone).Date == currentDate)
+                .ToList();
+
+            double dailyDistance = 0;
+            if (readingsOfCurrentDay.Any())
+            {
+                var dayEndMileage = readingsOfCurrentDay.Max(r => r.OdometerValue);
+                dailyDistance = dayEndMileage - lastKnownMileage;
+                lastKnownMileage = dayEndMileage;
+            }
+            results.Add(new DailyUsageDto
+            {
+                DayLabel = currentDate.ToString("ddd", new System.Globalization.CultureInfo("en-US")),
+                Distance = Math.Max(0, dailyDistance)
+            });
+        }
+        return results;
     }
 }

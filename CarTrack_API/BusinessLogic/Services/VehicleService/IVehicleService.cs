@@ -12,13 +12,15 @@ namespace CarTrack_API.BusinessLogic.Services.VehicleService;
 public interface IVehicleService
 {
     Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int clientId);
-    Task AddVehicleAsync( VehicleRequestDto request);
-    Task <VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehId);
-    Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehId);
-    Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehId);
-    Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehId);
+    Task AddVehicleAsync(VehicleRequestDto request);
     Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request);
+    Task AddMileageReadingAsync(int vehicleId, AddMileageReadingRequestDto request);
+    
+    Task<VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehicleId);
+    Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehicleId);
+    Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehicleId);
+    Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId);
+    
     Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId);
     Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId);
-    Task AddMileageReadingAsync(int vehicleId, AddMileageReadingRequestDto request);
 }

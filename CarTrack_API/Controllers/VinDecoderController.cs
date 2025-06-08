@@ -6,35 +6,21 @@ namespace CarTrack_API.Controllers;
 
 [Authorize(Roles = "client")]
 [Route("api/vindecoder")]
-public class VinDecoderController(IVinDecoderService vinDecoderService): ControllerBase
+public class VinDecoderController(IVinDecoderService vinDecoderService) : ControllerBase
 {
     private readonly IVinDecoderService _vinDecoderService = vinDecoderService;
     
-    [HttpGet ("{vin}/{clientId}")]
-    public async Task<IActionResult> DecodeVin([FromRoute] string vin, [FromRoute] int clientId)
+    [HttpGet("{vin}")] // Am eliminat clientId din rută
+    public async Task<IActionResult> DecodeVin([FromRoute] string vin)
     {
         if (string.IsNullOrWhiteSpace(vin) || vin.Length != 17) 
         {
             return BadRequest("Invalid VIN format.");
         }
-
-        if (clientId <= 0) 
-        {
-            return BadRequest("Invalid client ID.");
-        }
         
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var vinDecoded = await _vinDecoderService.DecodeVinAsync(vin);
         
-        if (vinDecoded.Count == 0)
-        {
-            return BadRequest(ModelState);
-        }
-        
+        // Nu mai e nevoie să returnezi BadRequest dacă e gol, un array gol e un răspuns valid
         return Ok(vinDecoded);
     }
 }

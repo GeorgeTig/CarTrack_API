@@ -6,165 +6,106 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarTrack_API.DataAccess.Repositories.VehicleRepository;
 
-public class VehicleRepository(ApplicationDbContext context) : BaseRepository.BaseRepository(context), IVehicleRepository
+public class VehicleRepository(ApplicationDbContext context) : IVehicleRepository
 {
-    public async Task<List<Vehicle>> GetAllByClientIdAsync( int clientId)
+    private readonly ApplicationDbContext _context = context;
+
+    public async Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId)
     {
-        return await Task.FromResult(_context.Vehicle
-            .Include(v=> v.VehicleModel)
-            .Include(v => v.Client)
-            .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceVerifiedRecord)
-            .Include(v => v.VehiclePapers)
+        return await _context.Vehicle
+            .Where(v => v.ClientId == clientId)
+            .Include(v => v.VehicleModel)
             .Include(v => v.VehicleInfo)
-            .Where(v => v.ClientId == clientId).ToList());
+            .AsNoTracking()
+            .ToListAsync();
     }
     
-    public async Task<Vehicle?> GetByIdAsync(int id)
+    public async Task<Vehicle?> GetVehicleForValidationAsync(string vin)
     {
-        var vehicle = await _context.Vehicle
-            .Include(v => v.VehicleModel)
-            .Include(v => v.Client)
-            .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceVerifiedRecord)
-            .Include(v => v.VehiclePapers)
+        return await _context.Vehicle
             .Include(v => v.VehicleInfo)
-            .FirstOrDefaultAsync(v => v.Id == id);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {id} not found");
-        }
-        
-        return vehicle;
-    }
-    
-    public async Task<Vehicle?> GetByVinAsync(string vin)
-    {
-        var vehicle = await _context.Vehicle
-            .Include(v => v.VehicleModel)
-            .Include(v => v.Client)
-            .Include(v => v.Appointments)
-            .Include(v => v.MaintenanceVerifiedRecord)
-            .Include(v => v.VehiclePapers)
-            .Include(v => v.VehicleInfo)
+            .AsNoTracking()
             .FirstOrDefaultAsync(v => v.VehicleInfo.Vin == vin);
-        
-        return vehicle;
     }
     
     public async Task AddVehicleAsync(Vehicle vehicle)
     {
-        var veh = await GetByVinAsync(vehicle.VehicleInfo.Vin);
-        
-        if ( veh != null)
+        var existingVehicle = await GetVehicleForValidationAsync(vehicle.VehicleInfo.Vin);
+        if (existingVehicle != null)
         {
-            throw new VehicleAlreadyExistException($"Vehicle with vin {veh.VehicleInfo.Vin} already exits!");
+            throw new VehicleAlreadyExistException($"Vehicle with VIN {vehicle.VehicleInfo.Vin} already exists!");
         }
-        
-        _context.Vehicle.Add(vehicle);
+        await _context.Vehicle.AddAsync(vehicle);
         await _context.SaveChangesAsync();
     }
-    
-    public async Task<VehicleEngine> GetVehicleEngineByVehicleIdAsync(int vehId)
+
+    public async Task<VehicleEngine?> GetEngineByVehicleIdAsync(int vehicleId)
     {
+        // Presupunând că relația este Vehicle -> VehicleModel -> VehicleEngine
         var vehicle = await _context.Vehicle
-            .Include(v => v.VehicleModel.VehicleEngine)
-            .FirstOrDefaultAsync(v => v.Id == vehId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
-        }
-        
-        return vehicle.VehicleModel.VehicleEngine;
-    }
-    
-    public async Task<VehicleInfo> GetVehicleInfoByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _context.Vehicle
-            .Include(v => v.VehicleInfo)
-            .FirstOrDefaultAsync(v => v.Id == vehId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
-        }
-        
-        return vehicle.VehicleInfo;
-    }
-    
-    public async Task<VehicleModel> GetVehicleModelByVehicleIdAsync(int vehId)
-    {
-        var vehicle = await _context.Vehicle
+            .Where(v => v.Id == vehicleId)
             .Include(v => v.VehicleModel)
-            .FirstOrDefaultAsync(v => v.Id == vehId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
-        }
-        
-        return vehicle.VehicleModel;
+            .ThenInclude(vm => vm.VehicleEngine)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        return vehicle?.VehicleModel?.VehicleEngine;
     }
     
-    public async Task<Body> GetVehicleBodyByVehicleIdAsync(int vehId)
+    public async Task<VehicleInfo?> GetInfoByVehicleIdAsync(int vehicleId)
+    {
+        return await _context.VehicleInfo
+            .AsNoTracking()
+            .FirstOrDefaultAsync(vi => vi.VehicleId == vehicleId);
+    }
+
+    public async Task<VehicleModel?> GetModelByVehicleIdAsync(int vehicleId)
     {
         var vehicle = await _context.Vehicle
-            .Include(v => v.VehicleModel.Body)
-            .FirstOrDefaultAsync(v => v.Id == vehId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
-        }
-        
-        return vehicle.VehicleModel.Body;
+            .Where(v => v.Id == vehicleId)
+            .Include(v => v.VehicleModel)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        return vehicle?.VehicleModel;
+    }
+    
+    public async Task<Body?> GetBodyByVehicleIdAsync(int vehicleId)
+    {
+        var vehicle = await _context.Vehicle
+            .Where(v => v.Id == vehicleId)
+            .Include(v => v.VehicleModel)
+            .ThenInclude(vm => vm.Body)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        return vehicle?.VehicleModel?.Body;
     }
 
     public async Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance)
     {
-        var vehicle = await _context.Vehicle
-            .Include(v => v.MaintenanceUnverifiedRecord)
-            .FirstOrDefaultAsync(v => v.Id == maintenance.VehicleId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {maintenance.VehicleId} not found");
-        }
-        
-        vehicle.MaintenanceUnverifiedRecord.Add(maintenance);
-        _context.Vehicle.Update(vehicle);
+        await _context.MaintenanceUnverifiedRecord.AddAsync(maintenance);
         await _context.SaveChangesAsync();
     }
     
-    public async Task<List<MaintenanceUnverifiedRecord>> GetVehicleMaintenanceByVehicleIdAsync(int vehId)
+    public async Task<List<MaintenanceUnverifiedRecord>> GetMaintenanceHistoryByVehicleIdAsync(int vehId)
     {
-        var vehicle = await _context.Vehicle
-            .Include(v => v.MaintenanceUnverifiedRecord)
-            .FirstOrDefaultAsync(v => v.Id == vehId);
-        
-        if (vehicle == null)
-        {
-            throw new VehicleNotFoundException($"Vehicle with id {vehId} not found");
-        }
-        
-        return vehicle.MaintenanceUnverifiedRecord;
-    }
-    
-    public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDate)
-    {
-        return await _context.MileageReading
-            .Where(r => r.VehicleId == vehicleId && r.ReadingDate >= startDate)
-            .OrderBy(r => r.ReadingDate)
+        return await _context.MaintenanceUnverifiedRecord
+            .Where(m => m.VehicleId == vehId)
+            .AsNoTracking()
+            .OrderByDescending(m => m.DoneDate)
             .ToListAsync();
     }
     
+    public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDateUtc)
+    {
+        return await _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId && r.ReadingDate >= startDateUtc)
+            .OrderBy(r => r.ReadingDate)
+            .ToListAsync();
+    }
+
     public async Task AddMileageReadingAsync(MileageReading reading)
     {
-        await _context.MileageReading
-            .AddAsync(reading);
-        await _context.SaveChangesAsync();
+        await _context.MileageReading.AddAsync(reading);
+        // SaveChanges va fi apelat în UpdateVehicleInfoAsync, nu e nevoie de 2 apeluri
     }
 
     public async Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId)
@@ -180,5 +121,9 @@ public class VehicleRepository(ApplicationDbContext context) : BaseRepository.Ba
         _context.VehicleInfo.Update(vehicleInfo);
         await _context.SaveChangesAsync();
     }
-    
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

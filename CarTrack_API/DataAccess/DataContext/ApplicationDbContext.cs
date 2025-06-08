@@ -25,6 +25,7 @@ public class ApplicationDbContext(DbContextOptions dbContextOptions) : DbContext
     public DbSet<VehicleMaintenanceConfig> VehicleMaintenanceConfig { get; set; }
     public DbSet<MaintenanceType> MaintenanceType { get; set; }
     public DbSet<MileageReading> MileageReading { get; set; }
+    public DbSet<MaintenanceUnverifiedRecord> MaintenanceUnverifiedRecord { get; set; }
     
     public DbSet<Reminder> Reminder { get; set; }
     public DbSet<Status> Status { get; set; }

@@ -2,50 +2,53 @@
 using CarTrack_API.EntityLayer.Dtos.RefreshToken;
 using CarTrack_API.EntityLayer.Dtos.UserDto.LoginDtos;
 using CarTrack_API.EntityLayer.Dtos.UserDto.RegisterDtos;
+using CarTrack_API.EntityLayer.Exceptions.UserExceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarTrack_API.Controllers;
 
 [Route("api/auth")]
 [ApiController]
-public class AuthController( IUserService userService) : ControllerBase
+public class AuthController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserLoginRequestDto request)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
         {
-            return BadRequest(ModelState);
+            var token = await _userService.LoginAsync(request);
+            return Ok(token);
         }
-        
-        var token = await _userService.LoginAsync(request);
-        
-        return Ok(token);
+        catch (UserNotFoundException ex)
+        {
+            return Unauthorized(new { message = ex.Message }); // 401 pentru credențiale greșite
+        }
     }
     
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserRegisterRequestDto request)
     {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        if (!ModelState.IsValid)
+        try
         {
-            return BadRequest(ModelState);
+            await _userService.RegisterAsync(request);
+            return Ok(new { message = "Registration successful." });
         }
-        
-        await _userService.RegisterAsync(request);
-        
-        return Ok();
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An error occurred during registration.", details = ex.Message });
+        }
     }
     
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
     {
-        if (string.IsNullOrEmpty(request.RefreshToken))
-        {
-            return BadRequest("Refresh token is required.");
-        }
+        if (string.IsNullOrEmpty(request.RefreshToken)) return BadRequest("Refresh token is required.");
 
         try
         {
@@ -57,6 +60,4 @@ public class AuthController( IUserService userService) : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
-
-    
 }
