@@ -126,4 +126,14 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
     {
         await _context.SaveChangesAsync();
     }
+    public async Task<Vehicle> GetVehicleWithDetailsByIdAsync(int vehicleId)
+    {
+        return await _context.Vehicle
+            .Include(v => v.VehicleInfo)
+            .Include(v => v.VehicleModel)
+            .ThenInclude(vm => vm.VehicleEngine)
+            .Include(v => v.VehicleModel)
+            .ThenInclude(vm => vm.Body)
+            .FirstOrDefaultAsync(v => v.Id == vehicleId);
+    }
 }

@@ -24,6 +24,8 @@ public interface IVehicleRepository
     Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId);
     Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDateUtc);
     Task UpdateVehicleInfoAsync(VehicleInfo vehicleInfo);
+    Task<Vehicle> GetVehicleWithDetailsByIdAsync(int vehicleId);
+
     
     // O metodă generică de salvare, utilă pentru BaseRepository
     Task SaveChangesAsync();

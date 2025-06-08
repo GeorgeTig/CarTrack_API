@@ -1,6 +1,8 @@
-﻿namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
+﻿using CarTrack_API.EntityLayer.Models;
+
+namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
 
 public interface IVehicleMaintenanceConfigService
 {
-    Task DefaultMaintenanceConfigAsync(int vehicleId);
+    Task DefaultMaintenanceConfigAsync(Vehicle vehicle);
 }

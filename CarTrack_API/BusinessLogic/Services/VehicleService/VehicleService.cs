@@ -28,10 +28,20 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleMainte
 
     public async Task AddVehicleAsync(VehicleRequestDto vehicleRequestDto)
     {
-        var vehicle = vehicleRequestDto.ToVehicle();
+        var vehicle = vehicleRequestDto.ToVehicle(); 
+
+        // 2. Îl adaugi în baza de date
         await _vehicleRepository.AddVehicleAsync(vehicle);
-        // vehicle.Id va fi populat de EF Core după salvare
-        await _vehicleConfigService.DefaultMaintenanceConfigAsync(vehicle.Id);
+        // După acest pas, vehicle.Id este populat, dar vehicle.VehicleModel este probabil null.
+
+        // --- AICI ESTE PASUL CRUCIAL LIPSĂ ---
+        // Înainte de a apela serviciul de configurare, trebuie să re-încărcăm obiectul
+        // 'vehicle' cu toate relațiile de care are nevoie calculatorul.
+
+        var fullVehicle = await _vehicleRepository.GetVehicleWithDetailsByIdAsync(vehicle.Id); // Trebuie să creezi această metodă în repository
+
+        // 3. Apelezi serviciul de configurare cu obiectul complet
+        await _vehicleConfigService.DefaultMaintenanceConfigAsync(fullVehicle); 
     }
     
     public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request)

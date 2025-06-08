@@ -1,259 +1,67 @@
-﻿using CarTrack_API.BusinessLogic.Services.ReminderService;
+﻿using CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
+using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.DataAccess.Repositories.VehicleMaintenanceConfigRepository;
 using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
 
-public class VehicleMaintenanceConfigService(IConfiguration config, IVehicleMaintenanceConfigRepository repository, IReminderService reminderService)
-    : IVehicleMaintenanceConfigService
-{
-    private readonly IConfiguration _config = config;
-    private readonly IVehicleMaintenanceConfigRepository _repository = repository;
-    private readonly IReminderService _reminderService = reminderService;
-
-
-    public async Task DefaultMaintenanceConfigAsync(int vehicleId)
+ public class VehicleMaintenanceConfigService : IVehicleMaintenanceConfigService
     {
-        var maintenanceSettings = _config.GetSection("DefaultMaintenanceSettings");
+        private readonly IVehicleMaintenanceConfigRepository _configRepository;
+        private readonly IMaintenanceCalculatorService _calculatorService;
+        private readonly IReminderService _reminderService;
+        private readonly ILogger<VehicleMaintenanceConfigService> _logger;
 
-        // Oil Change + Oil Filter Change
-        var oilConfig = new VehicleMaintenanceConfig
+        public VehicleMaintenanceConfigService(
+            IVehicleMaintenanceConfigRepository configRepository,
+            IMaintenanceCalculatorService calculatorService,
+            IReminderService reminderService,
+            ILogger<VehicleMaintenanceConfigService> logger)
         {
-            Name = "Oil Change + Oil Filter Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Oil:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Oil:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Oil:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(oilConfig);
-        await _reminderService.AddReminderAsync(oilConfig, oilConfig.Vehicle.VehicleInfo.Mileage);
+            _configRepository = configRepository;
+            _calculatorService = calculatorService;
+            _reminderService = reminderService;
+            _logger = logger;
+        }
 
-        // Oil Transmission
-        var oilTransmissionConfig = new VehicleMaintenanceConfig
+        public async Task DefaultMaintenanceConfigAsync(Vehicle vehicle)
         {
-            Name = "Oil Transmission Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Oil_Transmission:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Oil_Transmission:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Oil_Transmission:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(oilTransmissionConfig);
-        await _reminderService.AddReminderAsync(oilTransmissionConfig, oilTransmissionConfig.Vehicle.VehicleInfo.Mileage);
+            _logger.LogInformation("Se generează planul de mentenanță pentru vehiculul cu ID: {VehicleId}", vehicle.Id);
 
-        // Oil Differential
-        var oilDifferentialConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Oil Differential Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Oil_Differential:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Oil_Differential:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Oil_Differential:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(oilDifferentialConfig);
-        await _reminderService.AddReminderAsync(oilDifferentialConfig, oilDifferentialConfig.Vehicle.VehicleInfo.Mileage);
+            // Verificare de siguranță pentru a ne asigura că avem datele necesare
+            if (vehicle.VehicleModel?.VehicleEngine == null || vehicle.VehicleInfo == null)
+            {
+                _logger.LogError("Nu se poate genera planul de mentenanță pentru vehiculul ID {VehicleId} deoarece lipsesc informații esențiale (Model, Engine sau Info).", vehicle.Id);
+                return;
+            }
 
-        // Liquid Coolant
-        var liquidCoolantConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Liquid Coolant Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Liquid_Coolant:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_Coolant:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_Coolant:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(liquidCoolantConfig);
-        await _reminderService.AddReminderAsync(liquidCoolantConfig, liquidCoolantConfig.Vehicle.VehicleInfo.Mileage);
+            // Pasul 1: Se apelează noul serviciu pentru a obține planul personalizat
+            var calculatedPlan = _calculatorService.GeneratePlanForVehicle(vehicle);
+            _logger.LogInformation("Calculatorul de mentenanță a generat {Count} elemente pentru plan.", calculatedPlan.Count);
 
-        // Liquid Brake
-        var liquidBrakeConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Liquid Brake Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Liquid_Brake:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_Brake:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_Brake:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(liquidBrakeConfig);
-        await _reminderService.AddReminderAsync(liquidBrakeConfig, liquidBrakeConfig.Vehicle.VehicleInfo.Mileage);
+            // Pasul 2: Se iterează prin fiecare element al planului calculat
+            foreach (var planItem in calculatedPlan)
+            {
+                // Se creează un nou obiect de configurare
+                var newConfig = new VehicleMaintenanceConfig
+                {
+                    VehicleId = vehicle.Id,
+                    Name = planItem.Name,
+                    MaintenanceTypeId = planItem.TypeId,
+                    MileageIntervalConfig = planItem.MileageInterval,
+                    DateIntervalConfig = planItem.TimeInterval,
+                    IsEditable = false // Important: Regulile generate de sistem nu ar trebui să fie editabile de utilizator
+                };
 
-        // Liquid Servo Direction
-        var liquidServoDirectionConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Liquid Servo Direction Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Liquid_ServoDirection:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Liquid_ServoDirection:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Liquid_ServoDirection:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(liquidServoDirectionConfig);
-        await _reminderService.AddReminderAsync(liquidServoDirectionConfig, liquidServoDirectionConfig.Vehicle.VehicleInfo.Mileage);
+                // Pasul 3: Se adaugă configurația în baza de date
+                await _configRepository.AddAsync(newConfig);
+                // La acest punct, EF Core va popula `newConfig.Id`
 
-        // Filter Air
-        var filterAirConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Air Filter Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Filter_Air:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Air:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Air:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(filterAirConfig);
-        await _reminderService.AddReminderAsync(filterAirConfig, filterAirConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Filter Fuel
-        var filterFuelConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Fuel Filter Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Filter_Fuel:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Fuel:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Fuel:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(filterFuelConfig);
-        await _reminderService.AddReminderAsync(filterFuelConfig, filterFuelConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Filter Cabin
-        var filterCabinConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Cabin Filter Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Filter_Cabin:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Filter_Cabin:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Filter_Cabin:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(filterCabinConfig);
-        await _reminderService.AddReminderAsync(filterCabinConfig, filterCabinConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Brake Pads
-        var brakePadsConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Brake Pads Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Brake_Pads:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Brake_Pads:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Brake_Pads:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(brakePadsConfig);
-        await _reminderService.AddReminderAsync(brakePadsConfig, brakePadsConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Brake Discs
-        var brakeDiscsConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Brake Discs Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Brake_Discs:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Brake_Discs:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Brake_Discs:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(brakeDiscsConfig);
-        await _reminderService.AddReminderAsync(brakeDiscsConfig, brakeDiscsConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Eri
-        var eriConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Eri Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Eri:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Eri:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Eri:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(eriConfig);
-        await _reminderService.AddReminderAsync(eriConfig, eriConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Battery
-        var batteryConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Battery Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Battery:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Battery:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Battery:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(batteryConfig);
-        await _reminderService.AddReminderAsync(batteryConfig, batteryConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Direction
-        var directionConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Direction Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Direction:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Direction:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Direction:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(directionConfig);
-        await _reminderService.AddReminderAsync(directionConfig, directionConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Shock Absorbers
-        var shockAbsorbersConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Shock Absorbers Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Shock_Absorbers:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Shock_Absorbers:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Shock_Absorbers:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(shockAbsorbersConfig);
-        await _reminderService.AddReminderAsync(shockAbsorbersConfig, shockAbsorbersConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Clutch
-        var clutchConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Clutch Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Clutch:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Clutch:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Clutch:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(clutchConfig);
-        await _reminderService.AddReminderAsync(clutchConfig, clutchConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Differential
-        var differentialConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Differential Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Differential:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Differential:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Differential:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(differentialConfig);
-        await _reminderService.AddReminderAsync(differentialConfig, differentialConfig.Vehicle.VehicleInfo.Mileage);
-
-        // Freon Air Conditioning
-        var freonAirConditioningConfig = new VehicleMaintenanceConfig
-        {
-            Name = "Freon Air Conditioning Change",
-            DateIntervalConfig = int.Parse(maintenanceSettings["Freon_Air_Conditioning:Time"]),
-            MileageIntervalConfig = int.Parse(maintenanceSettings["Freon_Air_Conditioning:Mileage"]),
-            IsEditable = true,
-            MaintenanceTypeId = int.Parse(maintenanceSettings["Freon_Air_Conditioning:TypeId"]),
-            VehicleId = vehicleId
-        };
-        await AddConfigAsync(freonAirConditioningConfig);
-        await _reminderService.AddReminderAsync(freonAirConditioningConfig, freonAirConditioningConfig.Vehicle.VehicleInfo.Mileage);
+                // Pasul 4: Se creează reminder-ul asociat pentru această configurație
+                // Presupunem că AddReminderAsync se ocupă de logica creării reminderului
+                await _reminderService.AddReminderAsync(newConfig, vehicle.VehicleInfo.Mileage);
+                
+                _logger.LogInformation("S-a creat configurația '{ConfigName}' pentru vehiculul ID {VehicleId} cu intervalele: {Mileage} km / {Time} zile.", newConfig.Name, vehicle.Id, newConfig.MileageIntervalConfig, newConfig.DateIntervalConfig);
+            }
+        }
     }
-
-
-    private async Task AddConfigAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig)
-    {
-        await _repository.AddAsync(vehicleMaintenanceConfig);
-    }
-}
