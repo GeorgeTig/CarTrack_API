@@ -26,7 +26,8 @@ public static class MappingVehicle
                     Id = vehicle.Id,
                     Vin = "N/A", // Valoare default
                     Series = "Unknown Series", // Valoare default
-                    Year = 0 // Valoare default
+                    Year = 0, // Valoare default
+                    Producer = "Unknown Producer", // Valoare default
                 };
 
                 // Populăm câmpurile doar dacă obiectele relaționate nu sunt null
@@ -39,6 +40,7 @@ public static class MappingVehicle
                 {
                     vehicleResponseDto.Series = vehicle.VehicleModel.SeriesName;
                     vehicleResponseDto.Year = vehicle.VehicleModel.Year;
+                    vehicleResponseDto.Producer = vehicle.VehicleModel.Producer.Name ;
                 }
             
                 vehicleResponseDtos.Add(vehicleResponseDto);

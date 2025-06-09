@@ -16,6 +16,7 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .Where(v => v.ClientId == clientId)
             .Include(v => v.VehicleModel)
             .Include(v => v.VehicleInfo)
+            .Include(v=>v.VehicleModel.Producer)
             .AsNoTracking()
             .ToListAsync();
     }

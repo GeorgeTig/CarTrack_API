@@ -6,4 +6,5 @@ public class VehicleResponseDto
     public string Vin { get; set; }
     public required string Series { get; set; }
     public int Year { get; set; }
+    public required string Producer { get; set; }
 }
