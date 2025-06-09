@@ -10,6 +10,22 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
 {
     private readonly ApplicationDbContext _context = context;
 
+    public async Task<MileageReading?> GetLastReadingBeforeDateAsync(int vehicleId, DateTime date)
+    {
+        return await _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId && r.ReadingDate < date)
+            .OrderByDescending(r => r.ReadingDate)
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<MileageReading?> GetFirstReadingAfterDateAsync(int vehicleId, DateTime date)
+    {
+        return await _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId && r.ReadingDate > date)
+            .OrderBy(r => r.ReadingDate)
+            .FirstOrDefaultAsync();
+    }
+    
     public async Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId)
     {
         return await _context.Vehicle
