@@ -10,6 +10,8 @@ public interface IVehicleRepository
     Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId);
     Task<Vehicle?> GetVehicleForValidationAsync(string vin);
     Task AddVehicleAsync(Vehicle vehicle);
+    Task<Vehicle> GetVehicleByVinForUserAsync(string vin, int userId);
+
 
     // --- Metode pentru obținerea de sub-entități specifice ---
     Task<VehicleEngine?> GetEngineByVehicleIdAsync(int vehicleId);

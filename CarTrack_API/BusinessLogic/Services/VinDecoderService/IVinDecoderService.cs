@@ -4,5 +4,6 @@ namespace CarTrack_API.BusinessLogic.Services.VinDecoderService;
 
 public interface IVinDecoderService
 {
-    Task<List<VinDecodedResponseDto>> DecodeVinAsync(string vin);
+    Task<List<VinDecodedResponseDto>> DecodeVinAsync(string vin, int userId);
+    
 }

@@ -2,11 +2,6 @@
 
 public class VehicleAlreadyExistException : Exception
 {
-    public VehicleAlreadyExistException()
-    {
-    }
-    
-    public VehicleAlreadyExistException(string message) : base(message)
-    {
-    }
+    public VehicleAlreadyExistException() { }
+    public VehicleAlreadyExistException(string message) : base(message) { }
 }

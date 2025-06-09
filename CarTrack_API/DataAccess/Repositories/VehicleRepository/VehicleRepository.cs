@@ -21,6 +21,14 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .ToListAsync();
     }
     
+    public async Task<Vehicle> GetVehicleByVinForUserAsync(string vin, int userId)
+    {
+        return await _context.Vehicle
+            .Include(v => v.VehicleInfo)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.ClientId == userId && v.VehicleInfo.Vin == vin);
+    }
+    
     public async Task<Vehicle?> GetVehicleForValidationAsync(string vin)
     {
         return await _context.Vehicle
