@@ -6,50 +6,69 @@ using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.ReminderService;
 
-public class ReminderService(IReminderRepository reminderRepository) : IReminderService
-{
-    private readonly IReminderRepository _reminderRepository = reminderRepository;
-    
-    public async Task AddReminderAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig, double vehicleMileage)
+public class ReminderService : IReminderService
     {
-        var reminder = MappingReminder.ToReminder(vehicleMaintenanceConfig, vehicleMileage);
+        private readonly IReminderRepository _reminderRepository;
+
+        public ReminderService(IReminderRepository reminderRepository)
+        {
+            _reminderRepository = reminderRepository;
+        }
         
-        await _reminderRepository.AddAsync(reminder);
-    }
-    
-    public async Task<List<ReminderResponseDto>> GetAllRemindersByVehicleIdAsync(int vehicleId)
-    {
-        var reminders = await _reminderRepository.GetAllByVehicleIdAsync(vehicleId);
-        var reminderResponseDtos = reminders.ToListReminderResponseDto();
+        public async Task AddReminderAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig, double vehicleMileage)
+        {
+            var reminder = MappingReminder.ToReminder(vehicleMaintenanceConfig, vehicleMileage);
+            await _reminderRepository.AddAsync(reminder);
+        }
         
-        return reminderResponseDtos;
-    }
-    
-   public async Task UpdateReminderAsync(ReminderRequestDto reminderRequest)
-    {
-        await _reminderRepository.UpdateReminderAsync(reminderRequest);
-    }
+        public async Task<List<ReminderResponseDto>> GetAllRemindersByVehicleIdAsync(int vehicleId)
+        {
+            var reminders = await _reminderRepository.GetAllByVehicleIdAsync(vehicleId);
+            return reminders.ToListReminderResponseDto();
+        }
+        
+        public async Task<ReminderResponseDto> GetReminderByReminderIdAsync(int reminderId)
+        {
+            var reminder = await _reminderRepository.GetReminderByReminderIdAsync(reminderId);
+            return reminder.ToReminderResponseDto();
+        }
+
+        public async Task UpdateReminderAsync(ReminderRequestDto reminderRequest)
+        {
+            await _reminderRepository.UpdateReminderAsync(reminderRequest);
+        }
    
-    public async Task UpdateReminderAsync(VehicleMaintenanceRequestDto vehicleMaintenanceRequest)
-    {
-        
-        await _reminderRepository.UpdateReminderAsync(vehicleMaintenanceRequest);
-    }
+        // --- METODA REFACTORIZATĂ ---
+        public async Task UpdateReminderAsync(VehicleMaintenanceRequestDto vehicleMaintenanceRequest)
+        {
+            // Extragem ID-urile configurațiilor care corespund reminderelor efectuate
+            var configIdsToReset = vehicleMaintenanceRequest.MaintenanceItems
+                .Where(item => item.ConfigId.HasValue)
+                .Select(item => item.ConfigId.Value)
+                .ToList();
+            
+            // Dacă nu a fost efectuată nicio lucrare legată de un reminder, ieșim
+            if (!configIdsToReset.Any())
+            {
+                return;
+            }
+
+            // Delegăm logica de resetare către repository
+            await _reminderRepository.ResetRemindersAsync(
+                vehicleMaintenanceRequest.VehicleId,
+                configIdsToReset,
+                vehicleMaintenanceRequest.Mileage,
+                vehicleMaintenanceRequest.Date
+            );
+        }
     
-   public async Task UpdateReminderActiveAsync(int reminderId)
-    {
-        await _reminderRepository.UpdateReminderActiveAsync(reminderId);
-    }
+        public async Task UpdateReminderActiveAsync(int reminderId)
+        {
+            await _reminderRepository.UpdateReminderActiveAsync(reminderId);
+        }
    
-    public async Task ActualizeRemindersDueAsync()
-    {
-        await _reminderRepository.ActualizeRemindersDueAsync();
+        public async Task ActualizeRemindersDueAsync()
+        {
+            await _reminderRepository.ActualizeRemindersDueAsync();
+        }
     }
-    
-    public async Task<ReminderResponseDto> GetReminderByReminderIdAsync(int reminderId)
-    {
-        var reminder = await _reminderRepository.GetReminderByReminderIdAsync(reminderId);
-        var reminderResponseDto = reminder.ToReminderResponseDto();
-        return reminderResponseDto;
-    }
-}

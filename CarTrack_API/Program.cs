@@ -8,6 +8,7 @@ using CarTrack_API.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +22,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add EF Core DbContext
+// --- SECȚIUNEA MODIFICATĂ ---
+// Add EF Core DbContext with advanced Npgsql configuration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+    // Construim un NpgsqlDataSource pentru a putea configura opțiuni avansate
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
+    
+    // Activăm serializarea dinamică pentru a permite maparea List<T> -> jsonb
+    dataSourceBuilder.EnableDynamicJson(); 
+    
+    var dataSource = dataSourceBuilder.Build();
+
+    // Folosim noul dataSource configurat pentru DbContext
+    options.UseNpgsql(dataSource);
 });
 
 // JWT Authentication setup
@@ -46,7 +57,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<JwtService>(); // Consideră înlocuirea cu IJwtService dacă nu ai făcut-o deja
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -56,54 +67,49 @@ builder.Services.AddCors(options =>
         policy.AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials()
-              .WithOrigins("http://localhost:5098");
+              .WithOrigins("http://localhost:5098", "http://localhost:3000"); 
     });
 });
 
 // Add SignalR
 builder.Services.AddSignalR();
 
-// Add Quartz & ReminderJob
+// Add Quartz & Jobs
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("ReminderJob");
-    q.AddJob<ReminderJob>(opt => opt.WithIdentity(jobKey));
-
+    // Job pentru Remindere
+    var reminderJobKey = new JobKey("ReminderJob");
+    q.AddJob<ReminderJob>(opt => opt.WithIdentity(reminderJobKey));
     q.AddTrigger(t => t
         .WithIdentity("ReminderJob-trigger")
-        .ForJob(jobKey)
+        .ForJob(reminderJobKey)
         .WithSimpleSchedule(x => x.WithIntervalInMinutes(20).RepeatForever()));
+    
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 
-// Middleware
+// Middleware pipeline
 app.UseHttpsRedirection();
 
-// Adaugă mai întâi UseRouting
 app.UseRouting();
 
-// Enable authentication & authorization
+app.UseCors("CorsPolicy");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers
-app.MapControllers();
+// Middleware-ul custom pentru excepții
+app.UseMiddleware<ExceptionMiddleware>();
 
-// Enable SignalR hub endpoint
 app.UseEndpoints(endpoints =>
 {
+    endpoints.MapControllers();
     endpoints.MapHub<ReminderHub>("/reminderHub");
 });
 
-// Enable CORS
-app.UseCors("CorsPolicy");
-
-// Use middleware to handle exceptions
-app.UseMiddleware<ExceptionMiddleware>();
-
-// Swagger only in development
+// Swagger doar în Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

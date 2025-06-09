@@ -29,6 +29,8 @@ public interface IVehicleRepository
     Task<Vehicle> GetVehicleWithDetailsByIdAsync(int vehicleId);
     Task<MileageReading?> GetLastReadingBeforeDateAsync(int vehicleId, DateTime date);
     Task<MileageReading?> GetFirstReadingAfterDateAsync(int vehicleId, DateTime date);
+    Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids);
+
 
     
     // O metodă generică de salvare, utilă pentru BaseRepository

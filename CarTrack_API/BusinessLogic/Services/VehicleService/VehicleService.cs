@@ -31,33 +31,32 @@ public class VehicleService : IVehicleService
             _reminderService = reminderService;
         }
 
-        //=====================================================================
-        // METODA CENTRALĂ PRIVATĂ PENTRU GESTIONAREA ODOMETRULUI
-        //=====================================================================
         private async Task UpdateOdometerAsync(int vehicleId, double newOdometerValue, DateTime readingDate, string source)
         {
-            // Pasul 1: Validare cronologică
-            var previousReading = await _vehicleRepository.GetLastReadingBeforeDateAsync(vehicleId, readingDate);
+            // Asigurăm că data este tratată ca UTC înainte de a o folosi în query-uri.
+            var readingDateUtc = DateTime.SpecifyKind(readingDate, DateTimeKind.Utc);
+
+            // Pasul 1: Validare cronologică folosind data UTC
+            var previousReading = await _vehicleRepository.GetLastReadingBeforeDateAsync(vehicleId, readingDateUtc);
             if (previousReading != null && newOdometerValue < previousReading.OdometerValue)
             {
                 throw new ArgumentException($"Mileage ({newOdometerValue}) cannot be less than a previous reading ({previousReading.OdometerValue} on {previousReading.ReadingDate.ToShortDateString()}).");
             }
 
-            var nextReading = await _vehicleRepository.GetFirstReadingAfterDateAsync(vehicleId, readingDate);
+            var nextReading = await _vehicleRepository.GetFirstReadingAfterDateAsync(vehicleId, readingDateUtc);
             if (nextReading != null && newOdometerValue > nextReading.OdometerValue)
             {
                 throw new ArgumentException($"Mileage ({newOdometerValue}) cannot be greater than a future reading ({nextReading.OdometerValue} on {nextReading.ReadingDate.ToShortDateString()}).");
             }
 
-            // Pasul 2: Adăugare în istoric
+            // Pasul 2: Adăugare în istoric cu data UTC
             var newReading = new MileageReading
             {
                 VehicleId = vehicleId,
                 OdometerValue = newOdometerValue,
-                ReadingDate = readingDate,
+                ReadingDate = readingDateUtc, 
                 Source = source
             };
-            // Nota: Repository-ul de vehicule se va ocupa de salvare
             await _vehicleRepository.AddMileageReadingAsync(newReading); 
 
             // Pasul 3: Actualizarea valorii maxime în VehicleInfo
@@ -73,10 +72,6 @@ public class VehicleService : IVehicleService
             }
         }
 
-        //=====================================================================
-        // METODE PUBLICE REFACTORIZATE
-        //=====================================================================
-
         public async Task AddMileageReadingAsync(int vehicleId, AddMileageReadingRequestDto request)
         {
             await UpdateOdometerAsync(vehicleId, request.OdometerValue, DateTime.UtcNow, "QuickSync");
@@ -84,14 +79,11 @@ public class VehicleService : IVehicleService
 
         public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request)
         {
-            // Pasul 1: Gestionează actualizarea odometrului (va arunca excepție dacă e invalid)
             await UpdateOdometerAsync(request.VehicleId, request.Mileage, request.Date, "MaintenanceLog");
 
-            // Pasul 2: Adaugă înregistrarea de mentenanță
             var maintenanceRecord = request.ToMaintenanceUnverifiedRecord();
             await _vehicleRepository.AddVehicleMaintenanceAsync(maintenanceRecord);
             
-            // Pasul 3: Actualizează reminderele corespunzătoare
             await _reminderService.UpdateReminderAsync(request);
         }
 
@@ -100,18 +92,35 @@ public class VehicleService : IVehicleService
             var vehicle = vehicleRequestDto.ToVehicle();
             await _vehicleRepository.AddVehicleAsync(vehicle);
 
-            // Presupunând că ai implementat GetVehicleWithDetailsByIdAsync în repository
             var fullVehicle = await _vehicleRepository.GetVehicleWithDetailsByIdAsync(vehicle.Id);
             if (fullVehicle != null)
             {
-                 // Apelează serviciul care generează planul de mentenanță (fie el static sau dinamic)
                 await _vehicleConfigService.DefaultMaintenanceConfigAsync(fullVehicle);
             }
         }
 
-        //=====================================================================
-        // METODE PUBLICE NEMODIFICATE (EXISTENTE)
-        //=====================================================================
+        public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId)
+        {
+            var maintenanceLogs = await _vehicleRepository.GetMaintenanceHistoryByVehicleIdAsync(vehicleId);
+            if (!maintenanceLogs.Any())
+            {
+                return new List<MaintenanceLogDto>();
+            }
+            
+            var allConfigIds = maintenanceLogs
+                .Where(log => log.RelatedConfigIds != null && log.RelatedConfigIds.Any())
+                .SelectMany(log => log.RelatedConfigIds)
+                .Distinct()
+                .ToList();
+
+            var configIdToNameMap = new Dictionary<int, string>();
+            if (allConfigIds.Any())
+            {
+                configIdToNameMap = await _vehicleRepository.GetMaintenanceConfigNamesByIds(allConfigIds);
+            }
+
+            return maintenanceLogs.ToMaintenanceLogDtoList(configIdToNameMap);
+        }
 
         public async Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int id)
         {
@@ -147,15 +156,8 @@ public class VehicleService : IVehicleService
             return body.ToBodyResponseDto();
         }
 
-        public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId)
-        {
-            var maintenanceLogs = await _vehicleRepository.GetMaintenanceHistoryByVehicleIdAsync(vehicleId);
-            return maintenanceLogs.ToMaintenanceLogDtoList();
-        }
-
         public async Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId)
         {
-            // Logica ta existentă (pe care am discutat că o putem îmbunătăți ulterior)
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
             var todayInZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
             var firstDayOfInterval = todayInZone.AddDays(-6);

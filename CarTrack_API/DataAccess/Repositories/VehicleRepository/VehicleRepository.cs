@@ -26,6 +26,14 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .FirstOrDefaultAsync();
     }
     
+    public async Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids)
+    {
+        return await _context.VehicleMaintenanceConfig
+            .Where(c => ids.Contains(c.Id))
+            .AsNoTracking()
+            .ToDictionaryAsync(c => c.Id, c => c.Name);
+    }
+    
     public async Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId)
     {
         return await _context.Vehicle
@@ -130,7 +138,6 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
     public async Task AddMileageReadingAsync(MileageReading reading)
     {
         await _context.MileageReading.AddAsync(reading);
-        // SaveChanges va fi apelat în UpdateVehicleInfoAsync, nu e nevoie de 2 apeluri
     }
 
     public async Task<MileageReading?> GetLastMileageReadingAsync(int vehicleId)
