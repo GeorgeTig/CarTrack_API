@@ -1,4 +1,5 @@
 ﻿using CarTrack_API.BusinessLogic.Mapping;
+using CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
 using CarTrack_API.DataAccess.Repositories.ReminderRepository;
 using CarTrack_API.EntityLayer.Dtos.Maintenance;
 using CarTrack_API.EntityLayer.Dtos.ReminderDto;
@@ -9,10 +10,14 @@ namespace CarTrack_API.BusinessLogic.Services.ReminderService;
 public class ReminderService : IReminderService
 {
     private readonly IReminderRepository _reminderRepository;
+    private readonly IMaintenanceCalculatorService _calculatorService; // <-- DEPENDENȚĂ NOUĂ
 
-    public ReminderService(IReminderRepository reminderRepository)
+
+    public ReminderService(IReminderRepository reminderRepository, IMaintenanceCalculatorService calculatorService)
     {
         _reminderRepository = reminderRepository;
+        _calculatorService = calculatorService; 
+
     }
 
     public async Task AddReminderAsync(VehicleMaintenanceConfig vehicleMaintenanceConfig, double vehicleMileage)
@@ -61,10 +66,48 @@ public class ReminderService : IReminderService
             vehicleMaintenanceRequest.Date
         );
     }
+    
+    public async Task ResetReminderToDefaultAsync(int configId)
+    {
+        // 1. Preluăm configurația și vehiculul asociat
+        var configToReset = await _reminderRepository.GetConfigWithVehicleDetailsAsync(configId);
+
+        if (configToReset == null || configToReset.Vehicle == null)
+        {
+            throw new KeyNotFoundException($"Reminder configuration with ID {configId} not found.");
+        }
+        
+        // 2. Regenerăm planul de mentenanță default pentru vehiculul respectiv
+        var defaultPlan = _calculatorService.GeneratePlanForVehicle(configToReset.Vehicle);
+        
+        // 3. Căutăm în planul default elementul corespunzător reminderului nostru
+        // Ne bazăm pe nume, presupunând că este un identificator unic în contextul unui plan.
+        var defaultPlanItem = defaultPlan.FirstOrDefault(p => p.Name == configToReset.Name);
+
+        if (defaultPlanItem == null)
+        {
+            // Acest lucru nu ar trebui să se întâmple dacă logica e corectă
+            throw new InvalidOperationException($"Could not find default values for reminder '{configToReset.Name}'.");
+        }
+        
+        // 4. Actualizăm configurația existentă cu valorile default
+        configToReset.MileageIntervalConfig = defaultPlanItem.MileageInterval;
+        configToReset.DateIntervalConfig = defaultPlanItem.TimeInterval;
+
+        // 5. Salvăm modificările.
+        // Pentru asta, vom avea nevoie de o metodă de update în repository.
+        // Să o adăugăm.
+        await _reminderRepository.UpdateConfigAsync(configToReset);
+    }
 
     public async Task UpdateReminderActiveAsync(int reminderId)
     {
         await _reminderRepository.UpdateReminderActiveAsync(reminderId);
+    }
+    
+    public async Task<bool> UserOwnsReminderAsync(int userId, int configId)
+    {
+        return await _reminderRepository.DoesUserOwnReminderAsync(userId, configId);
     }
 
     public async Task ProcessReminderUpdatesAsync(double daysPassed)

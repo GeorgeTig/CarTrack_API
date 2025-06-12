@@ -31,13 +31,16 @@ public class VehicleService : IVehicleService
         _reminderService = reminderService;
     }
     
+    public async Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId)
+    {
+        return await _vehicleRepository.DoesUserOwnVehicleAsync(userId, vehicleId);
+    }
+    
     // Metodă privată centrală pentru actualizarea odometrului și a mediei zilnice
    private async Task UpdateOdometerAsync(int vehicleId, double newOdometerValue, DateTime readingDate, string source)
     {
         var readingDateUtc = DateTime.SpecifyKind(readingDate, DateTimeKind.Utc);
-
-        // 1. Validare cronologică: Previne introducerea de date ilogice (ex: 800km pe 09.Mai dacă pe 10.Mai aveai 100km).
-        // Această logică este deja corectă și foarte importantă.
+        
         var previousReading = await _vehicleRepository.GetLastReadingBeforeDateAsync(vehicleId, readingDateUtc);
         if (previousReading != null && newOdometerValue < previousReading.OdometerValue)
         {

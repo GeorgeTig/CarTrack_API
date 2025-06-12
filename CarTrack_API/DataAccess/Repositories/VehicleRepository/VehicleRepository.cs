@@ -18,6 +18,12 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .FirstOrDefaultAsync();
     }
     
+    public async Task<bool> DoesUserOwnVehicleAsync(int userId, int vehicleId)
+    {
+        return await _context.Vehicle
+            .AnyAsync(v => v.Id == vehicleId && v.ClientId == userId);
+    }
+    
     public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime? startDateUtc = null)
     {
         var query = _context.MileageReading

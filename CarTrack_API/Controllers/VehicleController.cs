@@ -18,32 +18,39 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     private readonly IVehicleService _vehicleService = vehicleService;
     private readonly IReminderService _reminderService = reminderService;
 
-    // Obține toate vehiculele pentru utilizatorul autentificat
+    // Metodă ajutătoare pentru a obține ID-ul utilizatorului autentificat din token
+    private int GetCurrentUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    // --- Endpoint-uri Generale (nu necesită un vehicleId specific) ---
+
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = GetCurrentUserId();
         var vehicles = await _vehicleService.GetAllByClientIdAsync(userId);
         return Ok(new { result = vehicles });
     }
 
-    // Adaugă un vehicul nou pentru utilizatorul autentificat
     [HttpPost("add")]
     public async Task<IActionResult> AddVehicle([FromBody] VehicleRequestDto request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
         // Forțăm setarea ID-ului de client cu cel din token pentru securitate
-        request.ClientId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        request.ClientId = GetCurrentUserId();
         
         await _vehicleService.AddVehicleAsync(request);
         return Ok(new { message = "Vehicle added successfully." });
     }
 
+    // --- Endpoint-uri Specifice unui Vehicul (Securizate cu Ownership Check) ---
+
     [HttpGet("engine/{vehicleId}")]
     public async Task<IActionResult> GetVehicleEngineByVehicleId([FromRoute] int vehicleId)
     {
-        // TODO: Implementează o verificare pentru a te asigura că utilizatorul curent deține acest vehicleId
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid(); // 403 Forbidden
+        
         var vehicleEngine = await _vehicleService.GetVehicleEngineByVehicleIdAsync(vehicleId);
         return Ok(vehicleEngine);
     }
@@ -51,7 +58,9 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("model/{vehicleId}")]
     public async Task<IActionResult> GetVehicleModelByVehicleId([FromRoute] int vehicleId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         var vehicleModel = await _vehicleService.GetVehicleModelByVehicleIdAsync(vehicleId);
         return Ok(vehicleModel);
     }
@@ -59,7 +68,9 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("info/{vehicleId}")]
     public async Task<IActionResult> GetVehicleInfoByVehicleId([FromRoute] int vehicleId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         var vehicleInfo = await _vehicleService.GetVehicleInfoByVehicleIdAsync(vehicleId);
         return Ok(vehicleInfo);
     }
@@ -67,7 +78,9 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("body/{vehicleId}")]
     public async Task<IActionResult> GetVehicleBodyByVehicleId([FromRoute] int vehicleId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         var vehicleBody = await _vehicleService.GetVehicleBodyByVehicleIdAsync(vehicleId);
         return Ok(vehicleBody);
     }
@@ -75,41 +88,21 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("{vehicleId}/reminders")]
     public async Task<IActionResult> GetRemindersByVehicleId([FromRoute] int vehicleId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         var reminders = await _reminderService.GetAllRemindersByVehicleIdAsync(vehicleId);
         return Ok(reminders);
     }
     
-    [HttpGet("reminders/get/{reminderId}")]
-    public async Task<IActionResult> GetReminderByReminderId([FromRoute] int reminderId)
-    {
-        // TODO: Verificare proprietar
-        var reminder = await _reminderService.GetReminderByReminderIdAsync(reminderId);
-        return Ok(reminder);
-    }
-
-    [HttpPost("update/reminder")]
-    public async Task<IActionResult> UpdateReminder([FromBody] ReminderRequestDto request)
-    {
-        // TODO: Verificare proprietar (pe baza request.Id)
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-        await _reminderService.UpdateReminderAsync(request);
-        return Ok();
-    }
-    
-    [HttpPost("update/reminder/{reminderId}/active")] 
-    public async Task<IActionResult> UpdateReminderActive([FromRoute] int reminderId)
-    {
-        // TODO: Verificare proprietar
-        await _reminderService.UpdateReminderActiveAsync(reminderId);
-        return Ok();
-    }
-
     [HttpPost("maintenance")]
     public async Task<IActionResult> AddMaintenance([FromBody] VehicleMaintenanceRequestDto request)
     {
-        // TODO: Verificare proprietar (pe baza request.VehicleId)
         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), request.VehicleId))
+            return Forbid();
+        
         await _vehicleService.AddVehicleMaintenanceAsync(request);
         return Ok(new { message = "Maintenance log added successfully." });
     }
@@ -117,7 +110,9 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("{vehicleId}/history/maintenance")]
     public async Task<IActionResult> GetMaintenanceHistory([FromRoute] int vehicleId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         var history = await _vehicleService.GetMaintenanceHistoryAsync(vehicleId);
         return Ok(history);
     }
@@ -125,7 +120,9 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpGet("{vehicleId}/usage/daily")]
     public async Task<IActionResult> GetDailyUsageForWeek([FromRoute] int vehicleId, [FromQuery] string timeZoneId)
     {
-        // TODO: Verificare proprietar
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
+        
         if (string.IsNullOrEmpty(timeZoneId)) return BadRequest(new { message = "A valid 'timeZoneId' query parameter is required." });
         
         try
@@ -144,8 +141,10 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [HttpPost("{vehicleId}/mileage-readings")]
     public async Task<IActionResult> AddMileageReading([FromRoute] int vehicleId, [FromBody] AddMileageReadingRequestDto request)
     {
-        // TODO: Verificare proprietar
         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+            return Forbid();
         
         try
         {
@@ -159,6 +158,68 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         catch (VehicleNotFoundException ex)
         {
             return NotFound(new { message = ex.Message });
+        }
+    }
+
+    // --- Endpoint-uri Specifice unui Reminder (Securizate cu Ownership Check pe Reminder) ---
+
+    [HttpGet("reminders/get/{reminderId}")]
+    public async Task<IActionResult> GetReminderByReminderId([FromRoute] int reminderId)
+    {
+        if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), reminderId))
+            return Forbid();
+        
+        var reminder = await _reminderService.GetReminderByReminderIdAsync(reminderId);
+        return Ok(reminder);
+    }
+
+    [HttpPost("update/reminder")]
+    public async Task<IActionResult> UpdateReminder([FromBody] ReminderRequestDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), request.Id))
+            return Forbid();
+        
+        await _reminderService.UpdateReminderAsync(request);
+        return Ok();
+    }
+    
+    [HttpPost("update/reminder/{reminderId}/active")] 
+    public async Task<IActionResult> UpdateReminderActive([FromRoute] int reminderId)
+    {
+        if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), reminderId))
+            return Forbid();
+        
+        await _reminderService.UpdateReminderActiveAsync(reminderId);
+        return Ok();
+    }
+    
+    [HttpPost("reminders/{configId}/reset-to-default")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ResetReminderToDefault([FromRoute] int configId)
+    {
+        // Securitate: Verificăm dacă utilizatorul deține acest reminder
+        if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), configId))
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            await _reminderService.ResetReminderToDefaultAsync(configId);
+            return NoContent(); // 204 No Content este un răspuns standard pentru o acțiune reușită care nu returnează conținut.
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Aceasta ar fi o eroare de server, indicând o problemă în logica de generare/potrivire
+            return StatusCode(500, new { message = ex.Message });
         }
     }
 }

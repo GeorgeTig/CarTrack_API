@@ -91,6 +91,33 @@ public class ReminderRepository : BaseRepository.BaseRepository, IReminderReposi
 
             await _context.SaveChangesAsync();
         }
+        
+        public async Task<bool> DoesUserOwnReminderAsync(int userId, int configId)
+        {
+            return await _context.VehicleMaintenanceConfig
+                .AnyAsync(c => c.Id == configId && c.Vehicle.ClientId == userId);
+        }
+        
+        public async Task<VehicleMaintenanceConfig?> GetConfigWithVehicleDetailsAsync(int configId)
+        {
+            // Încărcăm tot ce este necesar pentru MaintenanceCalculatorService
+            return await _context.VehicleMaintenanceConfig
+                .Include(c => c.Vehicle)
+                .ThenInclude(v => v.VehicleInfo)
+                .Include(c => c.Vehicle)
+                .ThenInclude(v => v.VehicleModel)
+                .ThenInclude(vm => vm.VehicleEngine)
+                .Include(c => c.Vehicle)
+                .ThenInclude(v => v.VehicleModel)
+                .ThenInclude(vm => vm.Body)
+                .FirstOrDefaultAsync(c => c.Id == configId);
+        }
+        
+        public async Task UpdateConfigAsync(VehicleMaintenanceConfig config)
+        {
+            _context.VehicleMaintenanceConfig.Update(config);
+            await _context.SaveChangesAsync();
+        }
 
         public async Task UpdateReminderActiveAsync(int reminderId)
         {

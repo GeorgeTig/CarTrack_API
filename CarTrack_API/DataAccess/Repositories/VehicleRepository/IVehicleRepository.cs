@@ -31,6 +31,7 @@ public interface IVehicleRepository
     Task<MileageReading?> GetFirstReadingAfterDateAsync(int vehicleId, DateTime date);
     Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids);
     Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime? startDateUtc = null);
+    Task<bool> DoesUserOwnVehicleAsync(int userId, int vehicleId);
 
 
 

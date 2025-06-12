@@ -20,6 +20,8 @@ public interface IVehicleService
     Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehicleId);
     Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehicleId);
     Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId);
+    Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId);
+
     
     Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId);
     Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId);
