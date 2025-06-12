@@ -6,6 +6,8 @@ public class Vehicle
     public int ClientId { get; set; }
     public ClientProfile Client { get; set; }
     public int VehicleModelId { get; set; }
+    public bool IsActive { get; set; } = true;
+    
     public VehicleModel VehicleModel { get; set; }
     public List<Appointment> Appointments = new();
     public List<VehiclePaper> VehiclePapers = new();
