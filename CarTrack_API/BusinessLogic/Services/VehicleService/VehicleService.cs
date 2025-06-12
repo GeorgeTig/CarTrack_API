@@ -36,6 +36,26 @@ public class VehicleService : IVehicleService
         return await _vehicleRepository.DoesUserOwnVehicleAsync(userId, vehicleId);
     }
     
+    public async Task DeactivateVehicleAsync(int vehicleId)
+    {
+        var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
+
+        if (vehicle == null)
+        {
+            // Nu aruncăm eroare, pentru că din perspectiva clientului, resursa "nu mai există" oricum.
+            // O operațiune DELETE pe o resursă inexistentă este idempotentă.
+            return;
+        }
+
+        vehicle.IsActive = false;
+        
+        // Ce facem cu reminderele? Cel mai bine este să le dezactivăm și pe ele.
+        // Vom avea nevoie de o logică suplimentară pentru asta.
+        await _reminderService.DeactivateRemindersForVehicleAsync(vehicleId);
+        
+        await _vehicleRepository.UpdateAsync(vehicle);
+    }
+    
     // Metodă privată centrală pentru actualizarea odometrului și a mediei zilnice
    private async Task UpdateOdometerAsync(int vehicleId, double newOdometerValue, DateTime readingDate, string source)
     {

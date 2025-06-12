@@ -15,7 +15,7 @@ public interface IReminderRepository
     Task<bool> DoesUserOwnReminderAsync(int userId, int configId);
     Task<VehicleMaintenanceConfig?> GetConfigWithVehicleDetailsAsync(int configId);
     Task UpdateConfigAsync(VehicleMaintenanceConfig config);
-
+    Task DeactivateAllRemindersForVehicleAsync(int vehicleId);
 
     // --- METODE NOI/MODIFICATE ---
     Task<List<Reminder>> GetAllActiveRemindersAsync();

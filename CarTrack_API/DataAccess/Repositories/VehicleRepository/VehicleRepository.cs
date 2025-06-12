@@ -17,13 +17,26 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .OrderByDescending(r => r.ReadingDate)
             .FirstOrDefaultAsync();
     }
-    
+
+    public async Task<Vehicle?> GetByIdAsync(int vehicleId)
+    {
+        return await _context.Vehicle.FindAsync(vehicleId);
+    }
+
+    public async Task UpdateAsync(Vehicle vehicle)
+    {
+        _context.Vehicle.Update(vehicle);
+        await _context.SaveChangesAsync();
+    }
+
+    // --- METODA ACTUALIZATĂ CU FILTRUL IsActive ---
     public async Task<bool> DoesUserOwnVehicleAsync(int userId, int vehicleId)
     {
         return await _context.Vehicle
-            .AnyAsync(v => v.Id == vehicleId && v.ClientId == userId);
+            .AnyAsync(v => v.Id == vehicleId && v.ClientId == userId && v.IsActive);
     }
-    
+
+    // --- PĂSTRĂM DOAR ACEASTĂ VERSIUNE A METODEI ---
     public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime? startDateUtc = null)
     {
         var query = _context.MileageReading
@@ -35,7 +48,7 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
         }
 
         return await query
-            .OrderBy(r => r.ReadingDate) // Întotdeauna sortăm cronologic
+            .OrderBy(r => r.ReadingDate)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -47,7 +60,7 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .OrderBy(r => r.ReadingDate)
             .FirstOrDefaultAsync();
     }
-    
+
     public async Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids)
     {
         return await _context.VehicleMaintenanceConfig
@@ -55,26 +68,26 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .AsNoTracking()
             .ToDictionaryAsync(c => c.Id, c => c.Name);
     }
-    
+
     public async Task<List<Vehicle>> GetVehiclesForListViewAsync(int clientId)
     {
         return await _context.Vehicle
-            .Where(v => v.ClientId == clientId)
+            .Where(v => v.ClientId == clientId && v.IsActive)
             .Include(v => v.VehicleModel)
             .Include(v => v.VehicleInfo)
-            .Include(v=>v.VehicleModel.Producer)
+            .Include(v => v.VehicleModel.Producer)
             .AsNoTracking()
             .ToListAsync();
     }
-    
-    public async Task<Vehicle> GetVehicleByVinForUserAsync(string vin, int userId)
+
+    public async Task<Vehicle?> GetVehicleByVinForUserAsync(string vin, int userId)
     {
         return await _context.Vehicle
             .Include(v => v.VehicleInfo)
             .AsNoTracking()
             .FirstOrDefaultAsync(v => v.ClientId == userId && v.VehicleInfo.Vin == vin);
     }
-    
+
     public async Task<Vehicle?> GetVehicleForValidationAsync(string vin)
     {
         return await _context.Vehicle
@@ -82,7 +95,7 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .AsNoTracking()
             .FirstOrDefaultAsync(v => v.VehicleInfo.Vin == vin);
     }
-    
+
     public async Task AddVehicleAsync(Vehicle vehicle)
     {
         var existingVehicle = await GetVehicleForValidationAsync(vehicle.VehicleInfo.Vin);
@@ -96,16 +109,14 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
 
     public async Task<VehicleEngine?> GetEngineByVehicleIdAsync(int vehicleId)
     {
-        // Presupunând că relația este Vehicle -> VehicleModel -> VehicleEngine
         var vehicle = await _context.Vehicle
             .Where(v => v.Id == vehicleId)
-            .Include(v => v.VehicleModel)
-            .ThenInclude(vm => vm.VehicleEngine)
+            .Include(v => v.VehicleModel.VehicleEngine)
             .AsNoTracking()
             .FirstOrDefaultAsync();
         return vehicle?.VehicleModel?.VehicleEngine;
     }
-    
+
     public async Task<VehicleInfo?> GetInfoByVehicleIdAsync(int vehicleId)
     {
         return await _context.VehicleInfo
@@ -122,13 +133,12 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .FirstOrDefaultAsync();
         return vehicle?.VehicleModel;
     }
-    
+
     public async Task<Body?> GetBodyByVehicleIdAsync(int vehicleId)
     {
         var vehicle = await _context.Vehicle
             .Where(v => v.Id == vehicleId)
-            .Include(v => v.VehicleModel)
-            .ThenInclude(vm => vm.Body)
+            .Include(v => v.VehicleModel.Body)
             .AsNoTracking()
             .FirstOrDefaultAsync();
         return vehicle?.VehicleModel?.Body;
@@ -137,23 +147,14 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
     public async Task AddVehicleMaintenanceAsync(MaintenanceUnverifiedRecord maintenance)
     {
         await _context.MaintenanceUnverifiedRecord.AddAsync(maintenance);
-        await _context.SaveChangesAsync();
     }
-    
+
     public async Task<List<MaintenanceUnverifiedRecord>> GetMaintenanceHistoryByVehicleIdAsync(int vehId)
     {
         return await _context.MaintenanceUnverifiedRecord
             .Where(m => m.VehicleId == vehId)
             .AsNoTracking()
             .OrderByDescending(m => m.DoneDate)
-            .ToListAsync();
-    }
-    
-    public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime startDateUtc)
-    {
-        return await _context.MileageReading
-            .Where(r => r.VehicleId == vehicleId && r.ReadingDate >= startDateUtc)
-            .OrderBy(r => r.ReadingDate)
             .ToListAsync();
     }
 
@@ -169,7 +170,7 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .OrderByDescending(r => r.ReadingDate)
             .FirstOrDefaultAsync();
     }
-    
+
     public async Task UpdateVehicleInfoAsync(VehicleInfo vehicleInfo)
     {
         _context.VehicleInfo.Update(vehicleInfo);
@@ -180,14 +181,13 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
     {
         await _context.SaveChangesAsync();
     }
-    public async Task<Vehicle> GetVehicleWithDetailsByIdAsync(int vehicleId)
+
+    public async Task<Vehicle?> GetVehicleWithDetailsByIdAsync(int vehicleId)
     {
         return await _context.Vehicle
             .Include(v => v.VehicleInfo)
-            .Include(v => v.VehicleModel)
-            .ThenInclude(vm => vm.VehicleEngine)
-            .Include(v => v.VehicleModel)
-            .ThenInclude(vm => vm.Body)
+            .Include(v => v.VehicleModel.VehicleEngine)
+            .Include(v => v.VehicleModel.Body)
             .FirstOrDefaultAsync(v => v.Id == vehicleId);
     }
 }

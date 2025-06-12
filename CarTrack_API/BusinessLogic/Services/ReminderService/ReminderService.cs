@@ -67,6 +67,11 @@ public class ReminderService : IReminderService
         );
     }
     
+    public async Task DeactivateRemindersForVehicleAsync(int vehicleId)
+    {
+        await _reminderRepository.DeactivateAllRemindersForVehicleAsync(vehicleId);
+    }
+    
     public async Task ResetReminderToDefaultAsync(int configId)
     {
         // 1. Preluăm configurația și vehiculul asociat

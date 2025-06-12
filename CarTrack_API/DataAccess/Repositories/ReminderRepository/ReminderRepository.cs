@@ -118,6 +118,23 @@ public class ReminderRepository : BaseRepository.BaseRepository, IReminderReposi
             _context.VehicleMaintenanceConfig.Update(config);
             await _context.SaveChangesAsync();
         }
+        
+        public async Task DeactivateAllRemindersForVehicleAsync(int vehicleId)
+        {
+            var reminders = await _context.Reminder
+                .Include(r => r.VehicleMaintenanceConfig)
+                .Where(r => r.VehicleMaintenanceConfig.VehicleId == vehicleId && r.IsActive)
+                .ToListAsync();
+        
+            if (reminders.Any())
+            {
+                foreach (var reminder in reminders)
+                {
+                    reminder.IsActive = false;
+                }
+                await _context.SaveChangesAsync();
+            }
+        }
 
         public async Task UpdateReminderActiveAsync(int reminderId)
         {
@@ -143,7 +160,7 @@ public class ReminderRepository : BaseRepository.BaseRepository, IReminderReposi
                 .ThenInclude(vc => vc.Vehicle)
                 .ThenInclude(v => v.VehicleInfo)
                 .Include(r => r.VehicleMaintenanceConfig.Vehicle.VehicleModel.Producer)
-                .Where(r => r.IsActive)
+                .Where(r => r.IsActive && r.VehicleMaintenanceConfig.Vehicle.IsActive) // <-- CONDIȚIE NOUĂ
                 .ToListAsync();
         }
 

@@ -195,6 +195,22 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         return Ok();
     }
     
+    [HttpDelete("{vehicleId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeactivateVehicle([FromRoute] int vehicleId)
+    {
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+        {
+            return Forbid(); 
+        }
+
+        await _vehicleService.DeactivateVehicleAsync(vehicleId);
+        
+        return NoContent();
+    }
+
+    
     [HttpPost("reminders/{configId}/reset-to-default")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

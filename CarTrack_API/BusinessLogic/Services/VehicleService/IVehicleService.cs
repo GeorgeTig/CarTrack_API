@@ -21,6 +21,8 @@ public interface IVehicleService
     Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehicleId);
     Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId);
     Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId);
+    Task DeactivateVehicleAsync(int vehicleId);
+
 
     
     Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId);
