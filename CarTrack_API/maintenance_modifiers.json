@@ -8,7 +8,7 @@
     },
     "Modifiers": [
       {
-        "Property": "Engine.FuelType",
+        "Property": "Vehicle.VehicleEngine.FuelType",
         "Cases": [
           { "Operator": "Contains", "Value": "unleaded", "Factor": 0.9 },
           { "Operator": "Contains", "Value": "gas", "Factor": 0.9 },
@@ -17,13 +17,13 @@
         ]
       },
       {
-        "Property": "Engine.Size",
+        "Property": "Vehicle.VehicleModel.VehicleEngine.Size",
         "Cases": [
           { "Operator": "GreaterThan", "Value": 3.0, "Factor": 0.9 }
         ]
       },
       {
-        "Property": "Vehicle.Year",
+        "Property": "Vehicle.VehicleModel.Year",
         "Cases": [
           { "Operator": "LessThan", "Value": 2015, "Factor": 0.85 }
         ]
@@ -39,7 +39,7 @@
     },
     "Modifiers": [
       {
-        "Property": "Engine.Transmission",
+        "Property": "Vehicle.VehicleEngine.Transmission",
         "Cases": [
           { "Operator": "Contains", "Value": "manual", "Factor": 1.25 },
           { "Operator": "Contains", "Value": "continuously", "Factor": 0.75 },
@@ -48,7 +48,7 @@
         ]
       },
       {
-        "Property": "Engine.Horsepower",
+        "Property": "Vehicle.VehicleEngine.Horsepower",
         "Cases": [
           { "Operator": "GreaterThan", "Value": 300, "Factor": 0.8 }
         ]
@@ -60,11 +60,11 @@
     "MaintenanceTypeId": 2,
     "BaseInterval": {
       "Mileage": 100000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "Engine.DriveType",
+        "Property": "Vehicle.VehicleEngine.DriveType",
         "Cases": [
           { "Operator": "Contains", "Value": "front", "Factor": 0 }
         ]
@@ -75,7 +75,7 @@
     "MaintenanceName": "Brake Fluid",
     "MaintenanceTypeId": 2,
     "BaseInterval": {
-      "Mileage": 0,
+      "Mileage": -1,
       "Time": 730
     },
     "Modifiers": []
@@ -107,7 +107,7 @@
     },
     "Modifiers": [
       {
-        "Property": "Engine.FuelType",
+        "Property": "Vehicle.VehicleEngine.FuelType",
         "Cases": [
           { "Operator": "Contains", "Value": "diesel", "Factor": 0.6 },
           { "Operator": "Contains", "Value": "electric", "Factor": 0 },
@@ -139,17 +139,17 @@
     "MaintenanceTypeId": 4,
     "BaseInterval": {
       "Mileage": 50000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "VehicleInfo.AverageTravelDistance",
+        "Property": "Vehicle.VehicleInfo.AverageTravelDistance",
         "Cases": [
           { "Operator": "LessThan", "Value": 30, "Factor": 0.7 }
         ]
       },
       {
-        "Property": "Body.BodyType",
+        "Property": "Vehicle.VehicleModel.Body.BodyType",
         "Cases": [
           { "Operator": "Contains", "Value": "SUV", "Factor": 0.85 },
           { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 },
@@ -163,17 +163,17 @@
     "MaintenanceTypeId": 4,
     "BaseInterval": {
       "Mileage": 100000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "VehicleInfo.AverageTravelDistance",
+        "Property": "Vehicle.VehicleInfo.AverageTravelDistance",
         "Cases": [
           { "Operator": "LessThan", "Value": 30, "Factor": 0.75 }
         ]
       },
       {
-        "Property": "Body.BodyType",
+        "Property": "Vehicle.VehicleModel.Body.BodyType",
         "Cases": [
           { "Operator": "Contains", "Value": "SUV", "Factor": 0.85 },
           { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 },
@@ -187,11 +187,11 @@
     "MaintenanceTypeId": 5,
     "BaseInterval": {
       "Mileage": 80000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "Engine.FuelType",
+        "Property": "Vehicle.VehicleEngine.FuelType",
         "Cases": [
           { "Operator": "Contains", "Value": "diesel", "Factor": 0 },
           { "Operator": "Contains", "Value": "electric", "Factor": 0 },
@@ -204,7 +204,7 @@
     "MaintenanceName": "Battery Check/Replacement",
     "MaintenanceTypeId": 5,
     "BaseInterval": {
-      "Mileage": 0,
+      "Mileage": -1,
       "Time": 1460
     },
     "Modifiers": []
@@ -214,11 +214,11 @@
     "MaintenanceTypeId": 6,
     "BaseInterval": {
       "Mileage": 80000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "Body.BodyType",
+        "Property": "Vehicle.VehicleModel.Body.BodyType",
         "Cases": [
           { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 }
         ]
@@ -239,11 +239,11 @@
     "MaintenanceTypeId": 7,
     "BaseInterval": {
       "Mileage": 150000,
-      "Time": 0
+      "Time": -1
     },
     "Modifiers": [
       {
-        "Property": "Engine.Transmission",
+        "Property": "Vehicle.VehicleEngine.Transmission",
         "Cases": [
           { "Operator": "Contains", "Value": "automatic", "Factor": 0 },
           { "Operator": "Contains", "Value": "continuously", "Factor": 0 },
@@ -265,7 +265,7 @@
     "MaintenanceName": "AC System Check & Refill",
     "MaintenanceTypeId": 9,
     "BaseInterval": {
-      "Mileage": 0,
+      "Mileage": -1,
       "Time": 730
     },
     "Modifiers": []

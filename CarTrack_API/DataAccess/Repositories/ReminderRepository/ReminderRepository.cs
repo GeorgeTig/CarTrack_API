@@ -71,11 +71,20 @@ public class ReminderRepository : BaseRepository.BaseRepository, IReminderReposi
 
             foreach (var reminder in remindersToReset)
             {
-                reminder.LastDateCheck = doneDate.ToUniversalTime();
-                reminder.LastMileageCkeck = doneMileage;
-                reminder.DueMileage = reminder.VehicleMaintenanceConfig.MileageIntervalConfig;
-                reminder.DueDate = reminder.VehicleMaintenanceConfig.DateIntervalConfig;
-                reminder.StatusId = 1; // Reset status to "Up to date"
+                var config = reminder.VehicleMaintenanceConfig;
+                var universalDoneDate = doneDate.ToUniversalTime();
+                
+                if (config.MileageIntervalConfig != -1)
+                {
+                    reminder.LastMileageCkeck = doneMileage;
+                    reminder.DueMileage = config.MileageIntervalConfig;
+                }
+                if (config.DateIntervalConfig != -1)
+                {
+                    reminder.LastDateCheck = universalDoneDate;
+                    reminder.DueDate = config.DateIntervalConfig;
+                }
+                reminder.StatusId = 1;
 
                 _context.Reminder.Update(reminder);
             }
