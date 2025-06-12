@@ -17,6 +17,22 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
             .OrderByDescending(r => r.ReadingDate)
             .FirstOrDefaultAsync();
     }
+    
+    public async Task<List<MileageReading>> GetMileageReadingsForDateRangeAsync(int vehicleId, DateTime? startDateUtc = null)
+    {
+        var query = _context.MileageReading
+            .Where(r => r.VehicleId == vehicleId);
+
+        if (startDateUtc.HasValue)
+        {
+            query = query.Where(r => r.ReadingDate >= startDateUtc.Value);
+        }
+
+        return await query
+            .OrderBy(r => r.ReadingDate) // Întotdeauna sortăm cronologic
+            .AsNoTracking()
+            .ToListAsync();
+    }
 
     public async Task<MileageReading?> GetFirstReadingAfterDateAsync(int vehicleId, DateTime date)
     {

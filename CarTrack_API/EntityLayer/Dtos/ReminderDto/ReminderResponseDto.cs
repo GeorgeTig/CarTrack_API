@@ -13,7 +13,7 @@ public class ReminderResponseDto
     public int TimeInterval { get; set; }
     
     public double DueMileage { get; set; }
-    public DateTime DueDate { get; set; }
+    public int DueDate { get; set; } 
     
     public bool IsEditable { get; set; }
     public bool IsActive { get; set; }

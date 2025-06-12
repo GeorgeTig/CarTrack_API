@@ -100,95 +100,32 @@ public class ReminderRepository : BaseRepository.BaseRepository, IReminderReposi
             }
         }
 
-        public async Task ActualizeRemindersDueAsync()
+        public async Task<List<Reminder>> GetAllActiveRemindersAsync()
         {
-            var reminders = await _context.Reminder
+            return await _context.Reminder
                 .Include(r => r.VehicleMaintenanceConfig)
-                    .ThenInclude(vc => vc.Vehicle)
-                        .ThenInclude(v => v.VehicleInfo)
+                .ThenInclude(vc => vc.Vehicle)
+                .ThenInclude(v => v.VehicleInfo)
+                .Include(r => r.VehicleMaintenanceConfig.Vehicle.VehicleModel.Producer)
                 .Where(r => r.IsActive)
                 .ToListAsync();
-            
-            var notificationsToAdd = new List<Notification>();
+        }
 
-            foreach (var reminder in reminders)
+        public async Task UpdateRemindersAndAddNotificationsAsync(List<Reminder> remindersToUpdate, List<Notification> notificationsToAdd)
+        {
+            if (remindersToUpdate.Any())
             {
-                // Verificare de siguranță
-                if (reminder.VehicleMaintenanceConfig.Vehicle?.VehicleInfo == null)
-                {
-                    continue;
-                }
-
-                var vehicle = reminder.VehicleMaintenanceConfig.Vehicle;
-                var vehicleInfo = vehicle.VehicleInfo;
-                var averageTravel = vehicleInfo.AverageTravelDistance;
-
-                var mileageInterval = reminder.VehicleMaintenanceConfig.MileageIntervalConfig;
-                var dateInterval = reminder.VehicleMaintenanceConfig.DateIntervalConfig;
-
-                // --- Actualizează contoarele ---
-                if (mileageInterval > 0)
-                {
-                    // Scade din kilometrajul rămas distanța medie parcursă
-                    reminder.DueMileage = Math.Max(0, reminder.DueMileage - averageTravel);
-                }
-
-                if (dateInterval > 0)
-                {
-                    // Scade o zi din timpul rămas
-                    reminder.DueDate = Math.Max(0, reminder.DueDate - 1);
-                }
-
-                // --- Evaluează starea reminder-ului ---
-                // Stabilește praguri pentru "Due Soon"
-                const int dueSoonMileageThreshold = 1000; // 1000 km
-                const int dueSoonTimeThreshold = 30; // 30 de zile
-
-                bool isOverdue = (mileageInterval > 0 && reminder.DueMileage <= 0) || (dateInterval > 0 && reminder.DueDate <= 0);
-                
-                bool isDueSoon = !isOverdue && 
-                                 ((mileageInterval > 0 && reminder.DueMileage <= dueSoonMileageThreshold) || 
-                                  (dateInterval > 0 && reminder.DueDate <= dueSoonTimeThreshold));
-
-                // --- Schimbă starea și creează notificări doar dacă starea se schimbă ---
-                if (isOverdue && reminder.StatusId != 3) // 3 = Overdue
-                {
-                    reminder.StatusId = 3;
-                    notificationsToAdd.Add(new Notification
-                    {
-                        VehicleId = vehicle.Id,
-                        Message = $"Overdue: '{reminder.VehicleMaintenanceConfig.Name}' for your {vehicle.VehicleModel.Producer.Name} {vehicle.VehicleModel.SeriesName} is past due.",
-                        Date = DateTime.UtcNow,
-                        IsActive = true,
-                        IsRead = false,
-                        UserId = vehicle.ClientId,
-                        RemiderId = reminder.VehicleMaintenanceConfigId
-                    });
-                }
-                else if (isDueSoon && reminder.StatusId == 1) // 1 = Up to date
-                {
-                    reminder.StatusId = 2; // 2 = Due Soon
-                    notificationsToAdd.Add(new Notification
-                    {
-                        VehicleId = vehicle.Id,
-                        Message = $"Upcoming: '{reminder.VehicleMaintenanceConfig.Name}' for your {vehicle.VehicleModel.Producer.Name} {vehicle.VehicleModel.SeriesName} is due soon.",
-                        Date = DateTime.UtcNow,
-                        IsActive = true,
-                        IsRead = false,
-                        UserId = vehicle.ClientId,
-                        RemiderId = reminder.VehicleMaintenanceConfigId
-                    });
-                }
-                // Nu resetăm la "Up to date" aici. Resetarea se face doar când se adaugă o mentenanță.
+                _context.Reminder.UpdateRange(remindersToUpdate);
             }
 
-            // Adaugă toate notificările create într-un singur batch
             if (notificationsToAdd.Any())
             {
                 await _context.Notification.AddRangeAsync(notificationsToAdd);
             }
-            
-            // Salvează toate modificările (starea reminderelor și noile notificări) la final
-            await _context.SaveChangesAsync();
+
+            if (remindersToUpdate.Any() || notificationsToAdd.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
         }
     }

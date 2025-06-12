@@ -13,5 +13,5 @@ namespace CarTrack_API.BusinessLogic.Services.ReminderService;
         Task UpdateReminderAsync(ReminderRequestDto reminderRequest);
         Task UpdateReminderAsync(VehicleMaintenanceRequestDto vehicleMaintenanceRequest);
         Task UpdateReminderActiveAsync(int reminderId);
-        Task ActualizeRemindersDueAsync();
-    }
+        
+        Task ProcessReminderUpdatesAsync(double daysPassed);    }

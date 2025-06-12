@@ -10,8 +10,10 @@ public interface IReminderRepository
     Task<List<Reminder>> GetAllByVehicleIdAsync(int vehicleId);
     Task<Reminder> GetReminderByReminderIdAsync(int reminderId);
     Task UpdateReminderAsync(ReminderRequestDto reminder);
-
     Task ResetRemindersAsync(int vehicleId, List<int> configIds, double doneMileage, DateTime doneDate);
     Task UpdateReminderActiveAsync(int reminderId);
-    Task ActualizeRemindersDueAsync();
+
+    // --- METODE NOI/MODIFICATE ---
+    Task<List<Reminder>> GetAllActiveRemindersAsync();
+    Task UpdateRemindersAndAddNotificationsAsync(List<Reminder> remindersToUpdate, List<Notification> notificationsToAdd);
 }

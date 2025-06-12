@@ -4,17 +4,25 @@ using Quartz;
 
 namespace CarTrack_API.BusinessLogic.Services.ReminderService.ReminderJobs;
 
-public class ReminderJob(IServiceScopeFactory scopeFactory, IReminderService reminderService) : IJob
+public class ReminderJob(IServiceScopeFactory scopeFactory) : IJob
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
-    private readonly IReminderService _reminderService = reminderService;
 
     public async Task Execute(IJobExecutionContext context)
     {
         using var scope = _scopeFactory.CreateScope();
+        
+        var reminderService = scope.ServiceProvider.GetRequiredService<IReminderService>();
         var hubContext = scope.ServiceProvider.GetRequiredService<IHubContext<ReminderHub>>();
 
-        await _reminderService.ActualizeRemindersDueAsync();
+        double daysPassed = 1.0; 
+        if (context.PreviousFireTimeUtc.HasValue)
+        {
+            var timeSinceLastFire = DateTime.UtcNow - context.PreviousFireTimeUtc.Value;
+            daysPassed = timeSinceLastFire.TotalDays;
+        }
+
+        await reminderService.ProcessReminderUpdatesAsync(daysPassed);
         
         await hubContext.Clients.All.SendAsync("UpdateReminders");
     }
