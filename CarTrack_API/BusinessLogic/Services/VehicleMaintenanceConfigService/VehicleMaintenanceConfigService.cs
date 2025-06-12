@@ -27,15 +27,13 @@ namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
         public async Task DefaultMaintenanceConfigAsync(Vehicle vehicle)
         {
             _logger.LogInformation("Se generează planul de mentenanță pentru vehiculul cu ID: {VehicleId}", vehicle.Id);
-
-            // Verificare de siguranță pentru a ne asigura că avem datele necesare
+            
             if (vehicle.VehicleModel?.VehicleEngine == null || vehicle.VehicleInfo == null)
             {
                 _logger.LogError("Nu se poate genera planul de mentenanță pentru vehiculul ID {VehicleId} deoarece lipsesc informații esențiale (Model, Engine sau Info).", vehicle.Id);
                 return;
             }
 
-            // Pasul 1: Se apelează noul serviciu pentru a obține planul personalizat
             var calculatedPlan = _calculatorService.GeneratePlanForVehicle(vehicle);
             _logger.LogInformation("Calculatorul de mentenanță a generat {Count} elemente pentru plan.", calculatedPlan.Count);
 
@@ -50,17 +48,11 @@ namespace CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
                     MaintenanceTypeId = planItem.TypeId,
                     MileageIntervalConfig = planItem.MileageInterval,
                     DateIntervalConfig = planItem.TimeInterval,
-                    IsEditable = false // Important: Regulile generate de sistem nu ar trebui să fie editabile de utilizator
+                    IsEditable = true
                 };
 
-                // Pasul 3: Se adaugă configurația în baza de date
                 await _configRepository.AddAsync(newConfig);
-                // La acest punct, EF Core va popula `newConfig.Id`
-
-                // Pasul 4: Se creează reminder-ul asociat pentru această configurație
-                // Presupunem că AddReminderAsync se ocupă de logica creării reminderului
                 await _reminderService.AddReminderAsync(newConfig, vehicle.VehicleInfo.Mileage);
-                
                 _logger.LogInformation("S-a creat configurația '{ConfigName}' pentru vehiculul ID {VehicleId} cu intervalele: {Mileage} km / {Time} zile.", newConfig.Name, vehicle.Id, newConfig.MileageIntervalConfig, newConfig.DateIntervalConfig);
             }
         }
