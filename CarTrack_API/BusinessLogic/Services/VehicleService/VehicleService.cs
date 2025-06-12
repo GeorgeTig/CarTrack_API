@@ -1,9 +1,12 @@
 ﻿using CarTrack_API.BusinessLogic.Mapping;
+using CarTrack_API.BusinessLogic.Services.NotificationService;
 using CarTrack_API.BusinessLogic.Services.ReminderService;
 using CarTrack_API.BusinessLogic.Services.VehicleMaintenanceConfigService;
+using CarTrack_API.DataAccess.Repositories.VehicleMaintenanceConfigRepository;
 using CarTrack_API.DataAccess.Repositories.VehicleRepository;
 using CarTrack_API.EntityLayer.Dtos.BodyDto;
 using CarTrack_API.EntityLayer.Dtos.Maintenance;
+using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Dtos.Usage;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleEngineDto;
@@ -20,15 +23,78 @@ public class VehicleService : IVehicleService
     private readonly IVehicleRepository _vehicleRepository;
     private readonly IVehicleMaintenanceConfigService _vehicleConfigService;
     private readonly IReminderService _reminderService;
+    private readonly IVehicleMaintenanceConfigRepository _configRepository;
+    private readonly INotificationService _notificationService;
+
 
     public VehicleService(
         IVehicleRepository vehicleRepository,
         IVehicleMaintenanceConfigService vehicleConfigService,
-        IReminderService reminderService)
+        IReminderService reminderService,
+        IVehicleMaintenanceConfigRepository configRepository,
+        INotificationService notificationService)
     {
         _vehicleRepository = vehicleRepository;
         _vehicleConfigService = vehicleConfigService;
         _reminderService = reminderService;
+        _configRepository = configRepository;
+        _notificationService = notificationService;
+    }
+    
+    public async Task AddCustomReminderAsync(int vehicleId, CustomReminderRequestDto request)
+    {
+        // 1. Validări de business
+        if (request.MileageInterval < 0 && request.DateInterval < 0)
+        {
+            throw new ArgumentException("At least one interval (mileage or date) must be provided.");
+        }
+        if (await _configRepository.DoesConfigNameExistForVehicleAsync(vehicleId, request.Name))
+        {
+            throw new ArgumentException($"A reminder with the name '{request.Name}' already exists for this vehicle.");
+        }
+
+        // 2. Creăm noua configurație de mentenanță
+        var newConfig = new VehicleMaintenanceConfig
+        {
+            VehicleId = vehicleId,
+            Name = request.Name,
+            MaintenanceTypeId = request.MaintenanceTypeId,
+            MileageIntervalConfig = request.MileageInterval,
+            DateIntervalConfig = request.DateInterval,
+            IsEditable = true,
+            IsCustom = true 
+
+        };
+        
+        await _configRepository.AddAsync(newConfig);
+
+        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
+        if (vehicleInfo == null)
+        {
+            throw new InvalidOperationException("Cannot add reminder, vehicle info not found.");
+        }
+        
+        await _reminderService.AddReminderAsync(newConfig, vehicleInfo.Mileage);
+    }
+    
+    public async Task DeleteCustomReminderAsync(int configId)
+    {
+        // 1. Preluăm configurația
+        var configToDelete = await _configRepository.GetByIdAsync(configId);
+        if (configToDelete == null)
+        {
+            // Resursa nu există, deci operațiunea de ștergere este considerată încheiată.
+            return;
+        }
+
+        // 2. Validare de Business: Permitem ștergerea doar dacă este custom.
+        if (!configToDelete.IsCustom)
+        {
+            throw new InvalidOperationException("Default reminders cannot be deleted. They can only be deactivated.");
+        }
+
+        // 3. Comandăm repository-ului să șteargă
+        await _configRepository.DeleteAsync(configToDelete);
     }
     
     public async Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId)
@@ -42,16 +108,15 @@ public class VehicleService : IVehicleService
 
         if (vehicle == null)
         {
-            // Nu aruncăm eroare, pentru că din perspectiva clientului, resursa "nu mai există" oricum.
-            // O operațiune DELETE pe o resursă inexistentă este idempotentă.
             return;
         }
 
         vehicle.IsActive = false;
         
-        // Ce facem cu reminderele? Cel mai bine este să le dezactivăm și pe ele.
-        // Vom avea nevoie de o logică suplimentară pentru asta.
-        await _reminderService.DeactivateRemindersForVehicleAsync(vehicleId);
+        await Task.WhenAll(
+                _reminderService.SoftDeleteRemindersForVehicleAsync(vehicleId),
+            _notificationService.DeactivateNotificationsForVehicleAsync(vehicleId)
+        );
         
         await _vehicleRepository.UpdateAsync(vehicle);
     }

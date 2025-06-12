@@ -1,5 +1,6 @@
 ﻿using CarTrack_API.EntityLayer.Dtos.BodyDto;
 using CarTrack_API.EntityLayer.Dtos.Maintenance;
+using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Dtos.Usage;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using CarTrack_API.EntityLayer.Dtos.VehicleEngineDto;
@@ -22,6 +23,10 @@ public interface IVehicleService
     Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId);
     Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId);
     Task DeactivateVehicleAsync(int vehicleId);
+    Task AddCustomReminderAsync(int vehicleId, CustomReminderRequestDto request);
+    Task DeleteCustomReminderAsync(int configId);
+
+
 
 
     

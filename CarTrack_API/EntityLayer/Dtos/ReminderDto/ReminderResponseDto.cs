@@ -17,6 +17,8 @@ public class ReminderResponseDto
     
     public bool IsEditable { get; set; }
     public bool IsActive { get; set; }
+    public bool IsCustom { get; set; } 
+
     
     public double LastMileageCheck { get; set; }
     public DateTime LastDateCheck { get; set; }

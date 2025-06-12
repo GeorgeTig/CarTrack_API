@@ -85,7 +85,11 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
         return await _context.Vehicle
             .Include(v => v.VehicleInfo)
             .AsNoTracking()
-            .FirstOrDefaultAsync(v => v.ClientId == userId && v.VehicleInfo.Vin == vin);
+            .FirstOrDefaultAsync(v => 
+                v.ClientId == userId && 
+                v.VehicleInfo.Vin == vin && 
+                v.IsActive);
+        
     }
 
     public async Task<Vehicle?> GetVehicleForValidationAsync(string vin)
@@ -93,15 +97,18 @@ public class VehicleRepository(ApplicationDbContext context) : IVehicleRepositor
         return await _context.Vehicle
             .Include(v => v.VehicleInfo)
             .AsNoTracking()
-            .FirstOrDefaultAsync(v => v.VehicleInfo.Vin == vin);
+            .FirstOrDefaultAsync(v => 
+                v.VehicleInfo.Vin == vin && 
+                v.IsActive);
+        
     }
 
     public async Task AddVehicleAsync(Vehicle vehicle)
     {
-        var existingVehicle = await GetVehicleForValidationAsync(vehicle.VehicleInfo.Vin);
-        if (existingVehicle != null)
+        var existingActiveVehicle = await GetVehicleForValidationAsync(vehicle.VehicleInfo.Vin);
+        if (existingActiveVehicle != null)
         {
-            throw new VehicleAlreadyExistException($"Vehicle with VIN {vehicle.VehicleInfo.Vin} already exists!");
+            throw new VehicleAlreadyExistException($"An active vehicle with VIN {vehicle.VehicleInfo.Vin} already exists!");
         }
         await _context.Vehicle.AddAsync(vehicle);
         await _context.SaveChangesAsync();

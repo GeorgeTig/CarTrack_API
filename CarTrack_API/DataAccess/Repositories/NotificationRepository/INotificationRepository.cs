@@ -6,4 +6,6 @@ public interface INotificationRepository
 {
     Task<List<Notification>> GetAllNotificationsAsync(int userId);
     Task MarkNotificationAsReadAsync(List<int> notificationIds);
+    Task DeactivateAllNotificationsForVehicleAsync(int vehicleId);
+
 }

@@ -6,6 +6,7 @@ using CarTrack_API.EntityLayer.Dtos.ReminderDto;
 using CarTrack_API.EntityLayer.Dtos.Usage;
 using CarTrack_API.EntityLayer.Dtos.VehicleDto;
 using CarTrack_API.EntityLayer.Exceptions.VehicleException;
+using CarTrack_API.EntityLayer.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -210,6 +211,64 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         return NoContent();
     }
 
+    
+    [HttpPost("{vehicleId}/reminders/add-custom")]
+    [ProducesResponseType(typeof(VehicleMaintenanceConfig), StatusCodes.Status201Created)]
+    public async Task<IActionResult> AddCustomReminder(
+        [FromRoute] int vehicleId, 
+        [FromBody] CustomReminderRequestDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        // Securitate: Verificăm dacă utilizatorul deține vehiculul
+        if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            await _vehicleService.AddCustomReminderAsync(vehicleId, request);
+            // Conform REST, un POST care creează o resursă ar trebui să returneze 201 Created.
+            // Putem returna locația noii resurse sau pur și simplu un mesaj de succes.
+            return StatusCode(201, new { message = "Custom reminder added successfully." });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+    
+    [HttpGet("reminders/types")]
+    [ProducesResponseType(typeof(List<ReminderTypeResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllReminderTypes()
+    {
+        // Nu este necesară nicio verificare de ownership, deoarece este o listă globală.
+        var types = await _reminderService.GetAllReminderTypesAsync();
+        return Ok(types);
+    }
+    
+    [HttpDelete("reminders/{configId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeactivateCustomReminder([FromRoute] int configId)
+    {
+        if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), configId))
+        {
+            return NotFound();
+        }
+        try
+        {
+            // Apelăm metoda redenumită
+            await _reminderService.SoftDeleteCustomReminderAsync(configId);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
     
     [HttpPost("reminders/{configId}/reset-to-default")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

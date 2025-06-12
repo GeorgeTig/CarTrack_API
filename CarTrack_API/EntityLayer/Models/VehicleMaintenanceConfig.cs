@@ -7,6 +7,8 @@ public class VehicleMaintenanceConfig
     public int DateIntervalConfig { get; set; } // in days
     public int MileageIntervalConfig { get; set; } // in km
     public bool IsEditable { get; set; }
+    public bool IsCustom { get; set; } = false; // Default este false
+
     
     public MaintenanceType MaintenanceType { get; set; }
     public int MaintenanceTypeId { get; set; }

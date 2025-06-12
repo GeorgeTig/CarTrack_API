@@ -18,5 +18,9 @@ public class NotificationService(INotificationRepository notificationRepository)
         await _notificationRepository.MarkNotificationAsReadAsync(notificationIds);
     }
 
+    public async Task DeactivateNotificationsForVehicleAsync(int vehicleId)
+    {
+        await _notificationRepository.DeactivateAllNotificationsForVehicleAsync(vehicleId);
+    }
    
 }

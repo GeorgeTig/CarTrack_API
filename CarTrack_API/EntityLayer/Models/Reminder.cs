@@ -17,4 +17,5 @@ public class Reminder
     public List<Notification> Notifications { get; set; }
     
     public bool IsActive { get; set; }
+    public bool IsDeleted { get; set; } = false;
 }

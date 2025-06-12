@@ -15,10 +15,27 @@ public class NotificationRepository(ApplicationDbContext context) : BaseReposito
             .Include(n => n.Vehicle.VehicleModel.Producer)
             .Include(n => n.Vehicle.VehicleInfo)
             .Include(n => n.Reminder)
-            .Where(n => n.User.Id == userId)
+            .Where(n => n.User.Id == userId && n.IsActive)
             .ToListAsync();
 
         return notifications;
+    }
+    
+    public async Task DeactivateAllNotificationsForVehicleAsync(int vehicleId)
+    {
+        // Găsim toate notificările active pentru vehiculul specificat
+        var notificationsToDeactivate = await _context.Notification
+            .Where(n => n.VehicleId == vehicleId && n.IsActive)
+            .ToListAsync();
+
+        if (notificationsToDeactivate.Any())
+        {
+            foreach (var notification in notificationsToDeactivate)
+            {
+                notification.IsActive = false;
+            }
+            await _context.SaveChangesAsync();
+        }
     }
     
     public async Task MarkNotificationAsReadAsync(List<int> notificationIds)
