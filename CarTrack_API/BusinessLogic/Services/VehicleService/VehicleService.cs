@@ -23,15 +23,14 @@ public class VehicleService : IVehicleService
     private readonly IVehicleRepository _vehicleRepository;
     private readonly IVehicleMaintenanceConfigService _vehicleConfigService;
     private readonly IReminderService _reminderService;
-    private readonly IVehicleMaintenanceConfigRepository _configRepository;
     private readonly INotificationService _notificationService;
-
+    private readonly IVehicleMaintenanceConfigRepository _configRepository;
 
     public VehicleService(
-        IVehicleRepository vehicleRepository,
-        IVehicleMaintenanceConfigService vehicleConfigService,
-        IReminderService reminderService,
-        IVehicleMaintenanceConfigRepository configRepository,
+        IVehicleRepository vehicleRepository, 
+        IVehicleMaintenanceConfigService vehicleConfigService, 
+        IReminderService reminderService, 
+        IVehicleMaintenanceConfigRepository configRepository, 
         INotificationService notificationService)
     {
         _vehicleRepository = vehicleRepository;
@@ -40,89 +39,8 @@ public class VehicleService : IVehicleService
         _configRepository = configRepository;
         _notificationService = notificationService;
     }
-    
-    public async Task AddCustomReminderAsync(int vehicleId, CustomReminderRequestDto request)
-    {
-        // 1. Validări de business
-        if (request.MileageInterval < 0 && request.DateInterval < 0)
-        {
-            throw new ArgumentException("At least one interval (mileage or date) must be provided.");
-        }
-        if (await _configRepository.DoesConfigNameExistForVehicleAsync(vehicleId, request.Name))
-        {
-            throw new ArgumentException($"A reminder with the name '{request.Name}' already exists for this vehicle.");
-        }
 
-        // 2. Creăm noua configurație de mentenanță
-        var newConfig = new VehicleMaintenanceConfig
-        {
-            VehicleId = vehicleId,
-            Name = request.Name,
-            MaintenanceTypeId = request.MaintenanceTypeId,
-            MileageIntervalConfig = request.MileageInterval,
-            DateIntervalConfig = request.DateInterval,
-            IsEditable = true,
-            IsCustom = true 
-
-        };
-        
-        await _configRepository.AddAsync(newConfig);
-
-        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
-        if (vehicleInfo == null)
-        {
-            throw new InvalidOperationException("Cannot add reminder, vehicle info not found.");
-        }
-        
-        await _reminderService.AddReminderAsync(newConfig, vehicleInfo.Mileage);
-    }
-    
-    public async Task DeleteCustomReminderAsync(int configId)
-    {
-        // 1. Preluăm configurația
-        var configToDelete = await _configRepository.GetByIdAsync(configId);
-        if (configToDelete == null)
-        {
-            // Resursa nu există, deci operațiunea de ștergere este considerată încheiată.
-            return;
-        }
-
-        // 2. Validare de Business: Permitem ștergerea doar dacă este custom.
-        if (!configToDelete.IsCustom)
-        {
-            throw new InvalidOperationException("Default reminders cannot be deleted. They can only be deactivated.");
-        }
-
-        // 3. Comandăm repository-ului să șteargă
-        await _configRepository.DeleteAsync(configToDelete);
-    }
-    
-    public async Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId)
-    {
-        return await _vehicleRepository.DoesUserOwnVehicleAsync(userId, vehicleId);
-    }
-    
-    public async Task DeactivateVehicleAsync(int vehicleId)
-    {
-        var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
-
-        if (vehicle == null)
-        {
-            return;
-        }
-
-        vehicle.IsActive = false;
-        
-        await Task.WhenAll(
-                _reminderService.SoftDeleteRemindersForVehicleAsync(vehicleId),
-            _notificationService.DeactivateNotificationsForVehicleAsync(vehicleId)
-        );
-        
-        await _vehicleRepository.UpdateAsync(vehicle);
-    }
-    
-    // Metodă privată centrală pentru actualizarea odometrului și a mediei zilnice
-   private async Task UpdateOdometerAsync(int vehicleId, double newOdometerValue, DateTime readingDate, string source)
+    private async Task UpdateOdometerAndInfoAsync(int vehicleId, double newOdometerValue, DateTime readingDate, string source)
     {
         var readingDateUtc = DateTime.SpecifyKind(readingDate, DateTimeKind.Utc);
         
@@ -131,95 +49,83 @@ public class VehicleService : IVehicleService
         {
             throw new ArgumentException($"Mileage ({newOdometerValue}) on {readingDate.ToShortDateString()} cannot be less than a previous reading ({previousReading.OdometerValue} on {previousReading.ReadingDate.ToShortDateString()}).");
         }
-
+        
         var nextReading = await _vehicleRepository.GetFirstReadingAfterDateAsync(vehicleId, readingDateUtc);
         if (nextReading != null && newOdometerValue > nextReading.OdometerValue)
         {
             throw new ArgumentException($"Mileage ({newOdometerValue}) on {readingDate.ToShortDateString()} cannot be greater than a future reading ({nextReading.OdometerValue} on {nextReading.ReadingDate.ToShortDateString()}).");
         }
-        
-        // 2. Adaugă noua citire în istoric.
-        var newReading = new MileageReading
-        {
-            VehicleId = vehicleId,
-            OdometerValue = newOdometerValue,
-            ReadingDate = readingDateUtc,
-            Source = source
-        };
-        await _vehicleRepository.AddMileageReadingAsync(newReading);
-        
-        // 3. Preluăm VehicleInfo pentru a-l actualiza.
+
         var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
         if (vehicleInfo == null)
         {
-             // Măsură de siguranță, acest lucru nu ar trebui să se întâmple pentru un vehicul existent.
             throw new VehicleNotFoundException($"Vehicle info not found for vehicle ID {vehicleId}.");
         }
-        
-        // 4. Actualizăm kilometrajul maxim dacă noua valoare este mai mare.
-        // Aceasta este implementarea Scenariului 2.
+
+        var newReading = new MileageReading { VehicleId = vehicleId, OdometerValue = newOdometerValue, ReadingDate = readingDateUtc, Source = source };
+        _vehicleRepository.AddMileageReading(newReading);
+
         if (newOdometerValue > vehicleInfo.Mileage)
         {
             vehicleInfo.Mileage = newOdometerValue;
         }
         vehicleInfo.LastUpdate = DateTime.UtcNow;
-
-        // Important: Salvăm toate modificările de până acum într-o singură tranzacție.
-        // Adăugarea MileageReading și actualizarea VehicleInfo sunt acum atomice.
-        await _vehicleRepository.SaveChangesAsync();
-
-        // 5. Recalculăm media zilnică, acum că datele noi sunt salvate.
-        await RecalculateAverageDailyDriveAsync(vehicleId);
+        _vehicleRepository.UpdateVehicleInfo(vehicleInfo);
     }
 
-    // Metodă privată nouă pentru calculul mediei
     private async Task RecalculateAverageDailyDriveAsync(int vehicleId)
     {
-        var relevantReadings = await _vehicleRepository.GetMileageReadingsForDateRangeAsync(vehicleId, DateTime.UtcNow.AddDays(-365));
-        if (relevantReadings.Count < 2) return;
+        var readings = await _vehicleRepository.GetMileageReadingsForDateRangeAsync(vehicleId, DateTime.UtcNow.AddDays(-365));
+        if (readings.Count < 2) return;
 
-        var firstReading = relevantReadings.First();
-        var lastReading = relevantReadings.Last();
+        var firstReading = readings.First();
+        var lastReading = readings.Last();
         var totalDistance = lastReading.OdometerValue - firstReading.OdometerValue;
         var totalDays = (lastReading.ReadingDate - firstReading.ReadingDate).TotalDays;
-
+        
         if (totalDistance <= 0 || totalDays < 7) return;
 
         var newAverage = totalDistance / totalDays;
         var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
-
         if (vehicleInfo != null)
         {
             if (newAverage > 0 && newAverage < 1000)
             {
                 vehicleInfo.AverageTravelDistance = Math.Round(newAverage, 2);
-                await _vehicleRepository.UpdateVehicleInfoAsync(vehicleInfo);
+                _vehicleRepository.UpdateVehicleInfo(vehicleInfo);
+                await _vehicleRepository.SaveChangesAsync();
             }
         }
     }
 
-    // --- Metode publice ale serviciului ---
-
     public async Task AddMileageReadingAsync(int vehicleId, AddMileageReadingRequestDto request)
     {
-        await UpdateOdometerAsync(vehicleId, request.OdometerValue, DateTime.UtcNow, "QuickSync");
+        await UpdateOdometerAndInfoAsync(vehicleId, request.OdometerValue, DateTime.UtcNow, "QuickSync");
+        await _vehicleRepository.SaveChangesAsync();
+        await RecalculateAverageDailyDriveAsync(vehicleId);
     }
 
     public async Task AddVehicleMaintenanceAsync(VehicleMaintenanceRequestDto request)
     {
-        await UpdateOdometerAsync(request.VehicleId, request.Mileage, request.Date, "MaintenanceLog");
-
-        var maintenanceRecord = request.ToMaintenanceUnverifiedRecord();
-        await _vehicleRepository.AddVehicleMaintenanceAsync(maintenanceRecord);
-        
+        await UpdateOdometerAndInfoAsync(request.VehicleId, request.Mileage, request.Date, "MaintenanceLog");
+        _vehicleRepository.AddVehicleMaintenance(request.ToMaintenanceUnverifiedRecord());
+        await _vehicleRepository.SaveChangesAsync();
+        await RecalculateAverageDailyDriveAsync(request.VehicleId);
         await _reminderService.UpdateReminderAsync(request);
     }
 
     public async Task AddVehicleAsync(VehicleRequestDto vehicleRequestDto)
     {
+        var existingVehicle = await _vehicleRepository.GetVehicleForValidationAsync(vehicleRequestDto.Vin);
+        if (existingVehicle != null)
+        {
+            throw new VehicleAlreadyExistException($"An active vehicle with VIN {vehicleRequestDto.Vin} already exists!");
+        }
+        
         var vehicle = vehicleRequestDto.ToVehicle();
-        await _vehicleRepository.AddVehicleAsync(vehicle);
-
+        _vehicleRepository.AddVehicle(vehicle);
+        await _vehicleRepository.SaveChangesAsync();
+        
         var fullVehicle = await _vehicleRepository.GetVehicleWithDetailsByIdAsync(vehicle.Id);
         if (fullVehicle != null)
         {
@@ -227,70 +133,114 @@ public class VehicleService : IVehicleService
         }
     }
 
+    public async Task DeactivateVehicleAsync(int vehicleId)
+    {
+        var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId);
+        if (vehicle == null) return;
+        
+        vehicle.IsActive = false;
+        _vehicleRepository.Update(vehicle);
+        await _vehicleRepository.SaveChangesAsync();
+        
+        await _reminderService.SoftDeleteRemindersForVehicleAsync(vehicleId);
+        await _notificationService.DeactivateNotificationsForVehicleAsync(vehicleId);
+    }
+    
+    public async Task AddCustomReminderAsync(int vehicleId, CustomReminderRequestDto request)
+    {
+        if (request.MileageInterval < 0 && request.DateInterval < 0)
+        {
+            throw new ArgumentException("At least one interval (mileage or date) must be provided.");
+        }
+        if (await _configRepository.DoesConfigNameExistForVehicleAsync(vehicleId, request.Name))
+        {
+            throw new ArgumentException($"A reminder with the name '{request.Name}' already exists for this vehicle.");
+        }
+        
+        var newConfig = new VehicleMaintenanceConfig { VehicleId = vehicleId, Name = request.Name, MaintenanceTypeId = request.MaintenanceTypeId, MileageIntervalConfig = request.MileageInterval, DateIntervalConfig = request.DateInterval, IsEditable = true, IsCustom = true };
+        await _configRepository.AddAsync(newConfig);
+        
+        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
+        if (vehicleInfo == null)
+        {
+            throw new InvalidOperationException("Cannot add reminder, vehicle info not found.");
+        }
+        
+        await _reminderService.AddReminderAsync(newConfig, vehicleInfo.Mileage);
+    }
+
+    public async Task DeleteCustomReminderAsync(int configId)
+    {
+        var configToDelete = await _configRepository.GetByIdAsync(configId);
+        if (configToDelete == null) return;
+        
+        if (!configToDelete.IsCustom)
+        {
+            throw new InvalidOperationException("Default reminders cannot be deleted. They can only be deactivated.");
+        }
+        await _configRepository.DeleteAsync(configToDelete);
+    }
+
+    public async Task<bool> UserOwnsVehicleAsync(int userId, int vehicleId)
+    {
+        return await _vehicleRepository.DoesUserOwnVehicleAsync(userId, vehicleId);
+    }
+    
+    public async Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int clientId)
+    {
+        var vehicles = await _vehicleRepository.GetVehiclesForListViewAsync(clientId);
+        return vehicles.ToListVehicleResponseDto();
+    }
+    
+    public async Task<VehicleEngineResponseDto?> GetVehicleEngineByVehicleIdAsync(int vehicleId)
+    {
+        var engine = await _vehicleRepository.GetEngineByVehicleIdAsync(vehicleId);
+        return engine?.ToVehicleEngineResponseDto();
+    }
+
+    public async Task<VehicleModelResponseDto?> GetVehicleModelByVehicleIdAsync(int vehicleId)
+    {
+        var model = await _vehicleRepository.GetModelByVehicleIdAsync(vehicleId);
+        return model?.ToVehicleModelResponseDto();
+    }
+    
+    public async Task<VehicleInfoResponseDto?> GetVehicleInfoByVehicleIdAsync(int vehicleId)
+    {
+        var info = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
+        return info?.ToVehicleInfoResponseDto();
+    }
+
+    public async Task<BodyResponseDto?> GetBodyByVehicleIdAsync(int vehicleId)
+    {
+        var body = await _vehicleRepository.GetBodyByVehicleIdAsync(vehicleId);
+        return body?.ToBodyResponseDto();
+    }
+    
     public async Task<List<MaintenanceLogDto>> GetMaintenanceHistoryAsync(int vehicleId)
     {
         var maintenanceLogs = await _vehicleRepository.GetMaintenanceHistoryByVehicleIdAsync(vehicleId);
-        if (!maintenanceLogs.Any())
-        {
-            return new List<MaintenanceLogDto>();
-        }
+        if (!maintenanceLogs.Any()) return new List<MaintenanceLogDto>();
         
-        var allConfigIds = maintenanceLogs
+        var configIds = maintenanceLogs
             .Where(log => log.RelatedConfigIds != null && log.RelatedConfigIds.Any())
             .SelectMany(log => log.RelatedConfigIds)
             .Distinct()
             .ToList();
-
+            
         var configIdToNameMap = new Dictionary<int, string>();
-        if (allConfigIds.Any())
+        if (configIds.Any())
         {
-            configIdToNameMap = await _vehicleRepository.GetMaintenanceConfigNamesByIds(allConfigIds);
+            configIdToNameMap = await _vehicleRepository.GetMaintenanceConfigNamesByIds(configIds);
         }
-
         return maintenanceLogs.ToMaintenanceLogDtoList(configIdToNameMap);
     }
-
-    public async Task<List<VehicleResponseDto>> GetAllByClientIdAsync(int id)
-    {
-        var vehicles = await _vehicleRepository.GetVehiclesForListViewAsync(id);
-        return vehicles.ToListVehicleResponseDto();
-    }
-
-    public async Task<VehicleEngineResponseDto> GetVehicleEngineByVehicleIdAsync(int vehicleId)
-    {
-        var vehicleEngine = await _vehicleRepository.GetEngineByVehicleIdAsync(vehicleId);
-        if (vehicleEngine == null) throw new VehicleNotFoundException("Vehicle Engine not found");
-        return vehicleEngine.ToVehicleEngineResponseDto();
-    }
-
-    public async Task<VehicleModelResponseDto> GetVehicleModelByVehicleIdAsync(int vehicleId)
-    {
-        var vehicleModel = await _vehicleRepository.GetModelByVehicleIdAsync(vehicleId);
-        if (vehicleModel == null) throw new VehicleNotFoundException("Vehicle Model not found");
-        return vehicleModel.ToVehicleModelResponseDto();
-    }
-
-    public async Task<VehicleInfoResponseDto> GetVehicleInfoByVehicleIdAsync(int vehicleId)
-    {
-        var vehicleInfo = await _vehicleRepository.GetInfoByVehicleIdAsync(vehicleId);
-        if (vehicleInfo == null) throw new VehicleNotFoundException("Vehicle Info not found");
-        return vehicleInfo.ToVehicleInfoResponseDto();
-    }
-
-    public async Task<BodyResponseDto> GetVehicleBodyByVehicleIdAsync(int vehicleId)
-    {
-        var body = await _vehicleRepository.GetBodyByVehicleIdAsync(vehicleId);
-        if (body == null) throw new VehicleNotFoundException("Vehicle Body not found");
-        return body.ToBodyResponseDto();
-    }
-
+    
     public async Task<List<DailyUsageDto>> GetDailyUsageForLastWeekAsync(int vehicleId, string timeZoneId)
     {
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
         var todayInZone = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone).Date;
         var firstDayOfInterval = todayInZone.AddDays(-6);
         var startDateUtc = TimeZoneInfo.ConvertTimeToUtc(firstDayOfInterval.AddDays(-1), timeZone);
-
         var readings = await _vehicleRepository.GetMileageReadingsForDateRangeAsync(vehicleId, startDateUtc);
 
         if (!readings.Any())
@@ -302,14 +252,14 @@ public class VehicleService : IVehicleService
 
         var results = new List<DailyUsageDto>();
         double lastKnownMileage = readings.First().OdometerValue;
-
+        
         for (int i = 0; i < 7; i++)
         {
             var currentDate = firstDayOfInterval.AddDays(i);
             var readingsOfCurrentDay = readings
                 .Where(r => TimeZoneInfo.ConvertTimeFromUtc(r.ReadingDate, timeZone).Date == currentDate)
                 .ToList();
-
+            
             double dailyDistance = 0;
             if (readingsOfCurrentDay.Any())
             {
@@ -317,11 +267,7 @@ public class VehicleService : IVehicleService
                 dailyDistance = dayEndMileage - lastKnownMileage;
                 lastKnownMileage = dayEndMileage;
             }
-            results.Add(new DailyUsageDto
-            {
-                DayLabel = currentDate.ToString("ddd", new System.Globalization.CultureInfo("en-US")),
-                Distance = Math.Max(0, dailyDistance)
-            });
+            results.Add(new DailyUsageDto { DayLabel = currentDate.ToString("ddd", new System.Globalization.CultureInfo("en-US")), Distance = Math.Max(0, dailyDistance) });
         }
         return results;
     }

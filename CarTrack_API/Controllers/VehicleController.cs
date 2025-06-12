@@ -81,8 +81,14 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     {
         if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
             return Forbid();
+    
+        var vehicleBody = await _vehicleService.GetBodyByVehicleIdAsync(vehicleId);
+
+        if (vehicleBody == null)
+        {
+            return NotFound(new { message = $"Body information not found for vehicle with ID {vehicleId}." });
+        }
         
-        var vehicleBody = await _vehicleService.GetVehicleBodyByVehicleIdAsync(vehicleId);
         return Ok(vehicleBody);
     }
 
