@@ -96,13 +96,6 @@ public class VehicleRepository : IVehicleRepository
             .FirstOrDefaultAsync();
         return vehicle?.VehicleModel?.VehicleEngine;
     }
-    
-    public async Task<VehicleInfo?> GetInfoByVehicleIdAsync(int vehicleId)
-    {
-        return await _context.VehicleInfo
-            .AsNoTracking()
-            .FirstOrDefaultAsync(vi => vi.VehicleId == vehicleId);
-    }
 
     public async Task<VehicleModel?> GetModelByVehicleIdAsync(int vehicleId)
     {
@@ -183,6 +176,21 @@ public class VehicleRepository : IVehicleRepository
             .Where(r => r.VehicleId == vehicleId && r.ReadingDate > date)
             .OrderBy(r => r.ReadingDate)
             .FirstOrDefaultAsync();
+    }
+    
+    public async Task<VehicleInfo?> GetInfoByVehicleIdForUpdateAsync(int vehicleId)
+    {
+        // Această metodă returnează o entitate "tracked".
+        return await _context.VehicleInfo.FirstOrDefaultAsync(vi => vi.VehicleId == vehicleId);
+    }
+    
+    // Metoda veche rămâne pentru scenarii de citire rapidă
+    public async Task<VehicleInfo?> GetInfoByVehicleIdAsync(int vehicleId)
+    {
+        // Aceasta este pentru citire, deci e rapidă și nu urmărește entitatea.
+        return await _context.VehicleInfo
+            .AsNoTracking()
+            .FirstOrDefaultAsync(vi => vi.VehicleId == vehicleId);
     }
 
     public async Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids)

@@ -23,6 +23,8 @@ public interface IVehicleRepository
     Task<Dictionary<int, string>> GetMaintenanceConfigNamesByIds(List<int> ids);
     Task<bool> DoesUserOwnVehicleAsync(int userId, int vehicleId);
     Task<Vehicle?> GetByIdAsync(int vehicleId);
+    Task<VehicleInfo?> GetInfoByVehicleIdForUpdateAsync(int vehicleId);
+
 
     // --- Metode de Scriere/Modificare ---
     void AddVehicle(Vehicle vehicle);
