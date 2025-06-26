@@ -19,11 +19,8 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     private readonly IVehicleService _vehicleService = vehicleService;
     private readonly IReminderService _reminderService = reminderService;
 
-    // Metodă ajutătoare pentru a obține ID-ul utilizatorului autentificat din token
     private int GetCurrentUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-    // --- Endpoint-uri Generale (nu necesită un vehicleId specific) ---
-
+    
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
@@ -37,20 +34,18 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         
-        // Forțăm setarea ID-ului de client cu cel din token pentru securitate
         request.ClientId = GetCurrentUserId();
         
         await _vehicleService.AddVehicleAsync(request);
         return Ok(new { message = "Vehicle added successfully." });
     }
 
-    // --- Endpoint-uri Specifice unui Vehicul (Securizate cu Ownership Check) ---
 
     [HttpGet("engine/{vehicleId}")]
     public async Task<IActionResult> GetVehicleEngineByVehicleId([FromRoute] int vehicleId)
     {
         if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
-            return Forbid(); // 403 Forbidden
+            return Forbid(); 
         
         var vehicleEngine = await _vehicleService.GetVehicleEngineByVehicleIdAsync(vehicleId);
         return Ok(vehicleEngine);
@@ -167,9 +162,7 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
             return NotFound(new { message = ex.Message });
         }
     }
-
-    // --- Endpoint-uri Specifice unui Reminder (Securizate cu Ownership Check pe Reminder) ---
-
+    
     [HttpGet("reminders/get/{reminderId}")]
     public async Task<IActionResult> GetReminderByReminderId([FromRoute] int reminderId)
     {
@@ -226,7 +219,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // Securitate: Verificăm dacă utilizatorul deține vehiculul
         if (!await _vehicleService.UserOwnsVehicleAsync(GetCurrentUserId(), vehicleId))
         {
             return Forbid();
@@ -235,8 +227,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         try
         {
             await _vehicleService.AddCustomReminderAsync(vehicleId, request);
-            // Conform REST, un POST care creează o resursă ar trebui să returneze 201 Created.
-            // Putem returna locația noii resurse sau pur și simplu un mesaj de succes.
             return StatusCode(201, new { message = "Custom reminder added successfully." });
         }
         catch (ArgumentException ex)
@@ -249,7 +239,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [ProducesResponseType(typeof(List<ReminderTypeResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllReminderTypes()
     {
-        // Nu este necesară nicio verificare de ownership, deoarece este o listă globală.
         var types = await _reminderService.GetAllReminderTypesAsync();
         return Ok(types);
     }
@@ -266,7 +255,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         }
         try
         {
-            // Apelăm metoda redenumită
             await _reminderService.SoftDeleteCustomReminderAsync(configId);
             return NoContent();
         }
@@ -282,7 +270,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ResetReminderToDefault([FromRoute] int configId)
     {
-        // Securitate: Verificăm dacă utilizatorul deține acest reminder
         if (!await _reminderService.UserOwnsReminderAsync(GetCurrentUserId(), configId))
         {
             return Forbid();
@@ -291,7 +278,7 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         try
         {
             await _reminderService.ResetReminderToDefaultAsync(configId);
-            return NoContent(); // 204 No Content este un răspuns standard pentru o acțiune reușită care nu returnează conținut.
+            return NoContent(); 
         }
         catch (KeyNotFoundException ex)
         {
@@ -299,7 +286,6 @@ public class VehicleController(IVehicleService vehicleService, IReminderService 
         }
         catch (InvalidOperationException ex)
         {
-            // Aceasta ar fi o eroare de server, indicând o problemă în logica de generare/potrivire
             return StatusCode(500, new { message = ex.Message });
         }
     }

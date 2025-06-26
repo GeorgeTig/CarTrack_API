@@ -83,7 +83,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(t => t
         .WithIdentity("ReminderJob-trigger")
         .ForJob(reminderJobKey)
-        .WithSimpleSchedule(x => x.WithIntervalInMinutes(24).RepeatForever()));
+        .WithSimpleSchedule(x => x.WithIntervalInHours(24).RepeatForever()));
     
 });
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
