@@ -5,7 +5,7 @@ using CarTrack_API.EntityLayer.Models;
 
 namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
 
-   public class MaintenanceCalculatorService : IMaintenanceCalculatorService
+public class MaintenanceCalculatorService : IMaintenanceCalculatorService
 {
     private readonly List<MaintenanceRuleDto> _rules;
     private readonly ILogger<MaintenanceCalculatorService> _logger;
@@ -23,7 +23,8 @@ namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
             string filePath = Path.Combine(AppContext.BaseDirectory, "maintenance_modifiers.json");
             string jsonString = File.ReadAllText(filePath);
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<List<MaintenanceRuleDto>>(jsonString, options) ?? new List<MaintenanceRuleDto>();
+            return JsonSerializer.Deserialize<List<MaintenanceRuleDto>>(jsonString, options) ??
+                   new List<MaintenanceRuleDto>();
         }
         catch (Exception ex)
         {
@@ -40,58 +41,44 @@ namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
         {
             double finalMileage = rule.BaseInterval.Mileage;
             double finalTime = rule.BaseInterval.Time;
-            
-            // Doar dacă intervalul este activ (nu e -1), aplicăm modificatorii.
-            // Acest lucru previne ca un factor de 0.8 să transforme -1 în -0.8, de exemplu.
-            if (finalMileage != -1 && finalTime != -1)
-            {
-                 foreach (var modifier in rule.Modifiers)
-                {
-                    object vehicleValue = GetPropertyValue(vehicle, modifier.Property);
 
-                    if (vehicleValue != null)
+            foreach (var modifier in rule.Modifiers)
+            {
+                object vehicleValue = GetPropertyValue(vehicle, modifier.Property);
+                if (vehicleValue != null)
+                {
+                    foreach (var caseDto in modifier.Cases)
                     {
-                        foreach (var caseDto in modifier.Cases)
+                        if (CheckCondition(vehicleValue, caseDto.Operator, caseDto.Value))
                         {
-                            if (CheckCondition(vehicleValue, caseDto.Operator, caseDto.Value))
-                            {
-                                // Aplicăm factorii doar pe valorile care nu sunt -1
-                                if (finalMileage != -1) finalMileage *= caseDto.Factor;
-                                if (finalTime != -1) finalTime *= caseDto.Factor;
-                                break; 
-                            }
+                            if (finalMileage != -1) finalMileage *= caseDto.Factor;
+                            if (finalTime != -1) finalTime *= caseDto.Factor;
+                            break;
                         }
                     }
                 }
             }
             
-            // Convertim rezultatele la int după toate calculele
-            int finalMileageInt = (int)Math.Round(finalMileage);
-            int finalTimeInt = (int)Math.Round(finalTime);
+            int finalMileageInt = (finalMileage != -1) ? RoundToNearestThousand((int)finalMileage) : -1;
+            int finalTimeInt =
+                (int)Math.Round(
+                    finalTime); 
 
-            // --- NOUA LOGICĂ DE VALIDARE ȘI ADĂUGARE ---
-
-            // Validare 1: Asigură-te că nu avem intervale 0, care sunt ambigue.
             if (finalMileageInt == 0 || finalTimeInt == 0)
             {
                 _logger.LogWarning(
-                    "Maintenance plan for '{MaintenanceName}' resulted in a '0' interval. " +
-                    "Please use -1 for inactive intervals in 'maintenance_modifiers.json'. Skipping this item.",
+                    "Maintenance plan for '{MaintenanceName}' resulted in a '0' interval after calculation or rounding. Skipping.",
                     rule.MaintenanceName);
-                continue; // Sarim peste acest element de plan, deoarece este configurat greșit
-            }
-            
-            // Validare 2: Asigură-te că cel puțin un interval este activ.
-            if (finalMileageInt < 0 && finalTimeInt < 0)
-            {
-                _logger.LogWarning(
-                    "Invalid maintenance plan generated for '{MaintenanceName}'. " +
-                    "Both mileage and time intervals are inactive (-1). Skipping this item.",
-                    rule.MaintenanceName);
-                continue; // Sarim peste acest element, deoarece nu are niciun criteriu de scadență
+                continue;
             }
 
-            // Dacă a trecut de validări, adăugăm planul.
+            if (finalMileageInt < 0 && finalTimeInt < 0)
+            {
+                _logger.LogWarning("Invalid maintenance plan for '{MaintenanceName}'. Both intervals are inactive.",
+                    rule.MaintenanceName);
+                continue;
+            }
+
             calculatedPlan.Add(new CalculatedMaintenancePlan
             {
                 Name = rule.MaintenanceName,
@@ -103,8 +90,24 @@ namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
 
         return calculatedPlan;
     }
+    
+    private int RoundToNearestThousand(int number)
+    {
+        if (number <= 0) return number; 
+        if (number < 1000) return 1000; 
 
-    // Metodele ajutătoare CheckCondition și GetPropertyValue rămân neschimbate
+        int remainder = number % 1000;
+        
+        if (remainder >= 500)
+        {
+            return (number - remainder) + 1000;
+        }
+        else
+        {
+            return number - remainder;
+        }
+    }
+
     private bool CheckCondition(object vehicleValue, string op, object ruleValue)
     {
         if (ruleValue is JsonElement element)
@@ -121,7 +124,7 @@ namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
                 }
             }
         }
-        
+
         return op.ToLower() switch
         {
             "contains" => vehicleValue.ToString().ToLower().Contains(ruleValue.ToString().ToLower()),
@@ -142,10 +145,12 @@ namespace CarTrack_API.BusinessLogic.Services.MaintenanceCalculatorService;
         foreach (var part in pathParts)
         {
             if (currentObject == null) return null;
-            var property = currentObject.GetType().GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+            var property = currentObject.GetType()
+                .GetProperty(part, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
             if (property == null) return null;
             currentObject = property.GetValue(currentObject);
         }
+
         return currentObject;
     }
 }

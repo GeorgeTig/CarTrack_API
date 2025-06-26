@@ -2,116 +2,97 @@
   {
     "MaintenanceName": "Engine Oil",
     "MaintenanceTypeId": 1,
-    "BaseInterval": {
-      "Mileage": 15000,
-      "Time": 365
-    },
+    "BaseInterval": { "Mileage": 12000, "Time": 365 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.FuelType",
+        "Property": "VehicleModel.VehicleEngine.EngineType",
         "Cases": [
-          { "Operator": "Contains", "Value": "unleaded", "Factor": 0.9 },
-          { "Operator": "Contains", "Value": "gas", "Factor": 0.9 },
-          { "Operator": "Contains", "Value": "electric", "Factor": 0 },
-          { "Operator": "Contains", "Value": "hydrogen", "Factor": 0 }
+          { "Operator": "Contains", "Value": "diesel", "Factor": 0.85 },
+          { "Operator": "Contains", "Value": "plug-in hybrid", "Factor": 1.25 },
+          { "Operator": "Contains", "Value": "electric", "Factor": 0 }
         ]
       },
       {
-        "Property": "Vehicle.VehicleModel.VehicleEngine.Size",
+        "Property": "VehicleModel.VehicleEngine.Cylinders",
         "Cases": [
-          { "Operator": "GreaterThan", "Value": 3.0, "Factor": 0.9 }
+          { "Operator": "Contains", "Value": "V8", "Factor": 0.85 },
+          { "Operator": "Contains", "Value": "V10", "Factor": 0.8 },
+          { "Operator": "Contains", "Value": "V12", "Factor": 0.75 },
+          { "Operator": "Contains", "Value": "W12", "Factor": 0.75 }
         ]
       },
       {
-        "Property": "Vehicle.VehicleModel.Year",
+        "Property": "VehicleModel.VehicleEngine.DriveType",
         "Cases": [
-          { "Operator": "LessThan", "Value": 2015, "Factor": 0.85 }
+          { "Operator": "Contains", "Value": "all wheel drive", "Factor": 0.9 },
+          { "Operator": "Contains", "Value": "four wheel drive", "Factor": 0.9 }
         ]
+      },
+      {
+        "Property": "VehicleModel.Year",
+        "Cases": [ { "Operator": "LessThan", "Value": 2015, "Factor": 0.9 } ]
       }
     ]
   },
   {
     "MaintenanceName": "Transmission Fluid",
     "MaintenanceTypeId": 2,
-    "BaseInterval": {
-      "Mileage": 80000,
-      "Time": 2190
-    },
+    "BaseInterval": { "Mileage": 100000, "Time": 2920 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.Transmission",
+        "Property": "VehicleModel.VehicleEngine.Transmission",
         "Cases": [
-          { "Operator": "Contains", "Value": "manual", "Factor": 1.25 },
-          { "Operator": "Contains", "Value": "continuously", "Factor": 0.75 },
-          { "Operator": "Contains", "Value": "automated manual", "Factor": 0.85 },
+          { "Operator": "Contains", "Value": "manual", "Factor": 0.7 },
+          { "Operator": "Contains", "Value": "continuously", "Factor": 0.6 },
+          { "Operator": "Contains", "Value": "automated manual", "Factor": 0.8 },
           { "Operator": "Contains", "Value": "direct drive", "Factor": 0 }
         ]
       },
       {
-        "Property": "Vehicle.VehicleEngine.Horsepower",
-        "Cases": [
-          { "Operator": "GreaterThan", "Value": 300, "Factor": 0.8 }
-        ]
+        "Property": "VehicleModel.VehicleEngine.Horsepower",
+        "Cases": [ { "Operator": "GreaterThan", "Value": 350, "Factor": 0.75 } ]
       }
     ]
   },
   {
     "MaintenanceName": "Differential Fluid",
     "MaintenanceTypeId": 2,
-    "BaseInterval": {
-      "Mileage": 100000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 100000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.DriveType",
-        "Cases": [
-          { "Operator": "Contains", "Value": "front", "Factor": 0 }
-        ]
+        "Property": "VehicleModel.VehicleEngine.DriveType",
+        "Cases": [ { "Operator": "Contains", "Value": "front", "Factor": 0 } ]
       }
     ]
   },
   {
     "MaintenanceName": "Brake Fluid",
     "MaintenanceTypeId": 2,
-    "BaseInterval": {
-      "Mileage": -1,
-      "Time": 730
-    },
+    "BaseInterval": { "Mileage": -1, "Time": 730 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Power Steering Fluid",
     "MaintenanceTypeId": 2,
-    "BaseInterval": {
-      "Mileage": 80000,
-      "Time": 1825
-    },
+    "BaseInterval": { "Mileage": 130000, "Time": 1825 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Coolant (Antifreeze)",
     "MaintenanceTypeId": 2,
-    "BaseInterval": {
-      "Mileage": 100000,
-      "Time": 1825
-    },
+    "BaseInterval": { "Mileage": 160000, "Time": 1825 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Fuel Filter",
     "MaintenanceTypeId": 3,
-    "BaseInterval": {
-      "Mileage": 60000,
-      "Time": 1460
-    },
+    "BaseInterval": { "Mileage": 100000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.FuelType",
+        "Property": "VehicleModel.VehicleEngine.EngineType",
         "Cases": [
           { "Operator": "Contains", "Value": "diesel", "Factor": 0.6 },
-          { "Operator": "Contains", "Value": "electric", "Factor": 0 },
-          { "Operator": "Contains", "Value": "hydrogen", "Factor": 0 }
+          { "Operator": "Contains", "Value": "electric", "Factor": 0 }
         ]
       }
     ]
@@ -119,37 +100,26 @@
   {
     "MaintenanceName": "Engine Air Filter",
     "MaintenanceTypeId": 3,
-    "BaseInterval": {
-      "Mileage": 40000,
-      "Time": 730
-    },
+    "BaseInterval": { "Mileage": 65000, "Time": 1095 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Cabin Air Filter",
     "MaintenanceTypeId": 3,
-    "BaseInterval": {
-      "Mileage": 20000,
-      "Time": 365
-    },
+    "BaseInterval": { "Mileage": 35000, "Time": 365 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Brake Pads",
     "MaintenanceTypeId": 4,
-    "BaseInterval": {
-      "Mileage": 50000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 80000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleInfo.AverageTravelDistance",
-        "Cases": [
-          { "Operator": "LessThan", "Value": 30, "Factor": 0.7 }
-        ]
+        "Property": "VehicleInfo.AverageTravelDistance",
+        "Cases": [ { "Operator": "LessThan", "Value": 30, "Factor": 0.7 } ]
       },
       {
-        "Property": "Vehicle.VehicleModel.Body.BodyType",
+        "Property": "VehicleModel.Body.BodyType",
         "Cases": [
           { "Operator": "Contains", "Value": "SUV", "Factor": 0.85 },
           { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 },
@@ -161,19 +131,14 @@
   {
     "MaintenanceName": "Brake Discs",
     "MaintenanceTypeId": 4,
-    "BaseInterval": {
-      "Mileage": 100000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 160000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleInfo.AverageTravelDistance",
-        "Cases": [
-          { "Operator": "LessThan", "Value": 30, "Factor": 0.75 }
-        ]
+        "Property": "VehicleInfo.AverageTravelDistance",
+        "Cases": [ { "Operator": "LessThan", "Value": 30, "Factor": 0.75 } ]
       },
       {
-        "Property": "Vehicle.VehicleModel.Body.BodyType",
+        "Property": "VehicleModel.Body.BodyType",
         "Cases": [
           { "Operator": "Contains", "Value": "SUV", "Factor": 0.85 },
           { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 },
@@ -185,17 +150,13 @@
   {
     "MaintenanceName": "Spark Plugs",
     "MaintenanceTypeId": 5,
-    "BaseInterval": {
-      "Mileage": 80000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 130000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.FuelType",
+        "Property": "VehicleModel.VehicleEngine.EngineType",
         "Cases": [
           { "Operator": "Contains", "Value": "diesel", "Factor": 0 },
-          { "Operator": "Contains", "Value": "electric", "Factor": 0 },
-          { "Operator": "Contains", "Value": "hydrogen", "Factor": 0 }
+          { "Operator": "Contains", "Value": "electric", "Factor": 0 }
         ]
       }
     ]
@@ -203,24 +164,19 @@
   {
     "MaintenanceName": "Battery Check/Replacement",
     "MaintenanceTypeId": 5,
-    "BaseInterval": {
-      "Mileage": -1,
-      "Time": 1460
-    },
+    "BaseInterval": { "Mileage": -1, "Time": 1460 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Shock Absorbers Inspection",
     "MaintenanceTypeId": 6,
-    "BaseInterval": {
-      "Mileage": 80000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 130000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleModel.Body.BodyType",
+        "Property": "VehicleModel.Body.BodyType",
         "Cases": [
-          { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 }
+          { "Operator": "Contains", "Value": "Truck", "Factor": 0.8 },
+          { "Operator": "Contains", "Value": "Van", "Factor": 0.85 }
         ]
       }
     ]
@@ -228,22 +184,16 @@
   {
     "MaintenanceName": "Wheel Alignment",
     "MaintenanceTypeId": 6,
-    "BaseInterval": {
-      "Mileage": 50000,
-      "Time": 730
-    },
+    "BaseInterval": { "Mileage": 80000, "Time": 730 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "Clutch System",
     "MaintenanceTypeId": 7,
-    "BaseInterval": {
-      "Mileage": 150000,
-      "Time": -1
-    },
+    "BaseInterval": { "Mileage": 240000, "Time": -1 },
     "Modifiers": [
       {
-        "Property": "Vehicle.VehicleEngine.Transmission",
+        "Property": "VehicleModel.VehicleEngine.Transmission",
         "Cases": [
           { "Operator": "Contains", "Value": "automatic", "Factor": 0 },
           { "Operator": "Contains", "Value": "continuously", "Factor": 0 },
@@ -255,19 +205,13 @@
   {
     "MaintenanceName": "Steering System Inspection",
     "MaintenanceTypeId": 8,
-    "BaseInterval": {
-      "Mileage": 60000,
-      "Time": 730
-    },
+    "BaseInterval": { "Mileage": 100000, "Time": 730 },
     "Modifiers": []
   },
   {
     "MaintenanceName": "AC System Check & Refill",
     "MaintenanceTypeId": 9,
-    "BaseInterval": {
-      "Mileage": -1,
-      "Time": 730
-    },
+    "BaseInterval": { "Mileage": -1, "Time": 730 },
     "Modifiers": []
   }
 ]
