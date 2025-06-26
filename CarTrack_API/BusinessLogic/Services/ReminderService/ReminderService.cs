@@ -146,9 +146,9 @@ public class ReminderService : IReminderService
                 hasChanged = true;
             }
 
-            bool mileageIsDueSoon = config.MileageIntervalConfig != -1 && reminder.DueMileage <= 100;
+            bool mileageIsDueSoon = config.MileageIntervalConfig != -1 && reminder.DueMileage <= 1000;
             bool timeIsDueSoon = config.DateIntervalConfig != -1 && reminder.DueDate <= 30;
-            bool mileageIsOverdue = config.MileageIntervalConfig != -1 && reminder.DueMileage <= 10;
+            bool mileageIsOverdue = config.MileageIntervalConfig != -1 && reminder.DueMileage <= 50;
             bool timeIsOverdue = config.DateIntervalConfig != -1 && reminder.DueDate <= 1;
 
             if (mileageIsOverdue || timeIsOverdue) reminder.StatusId = 3;
